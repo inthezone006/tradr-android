@@ -144,7 +144,7 @@ fun GuideScreen(navController: NavController) {
                     title = "Trade Contracts & Limit Orders",
                     icon = Icons.Default.Description,
                     content = "Automate your strategy with price-triggered buy and sell orders.",
-                    detailedContent = "A Limit Order (BUY_AT or SELL_AT) allows you to set a specific price to enter or exit a position. For example, if Apple is at $190, you can set a 'BUY_AT' contract at $180. If the price drops to $180, TradeSim will automatically buy the shares for you. This helps you trade without constantly watching the screen."
+                    detailedContent = "A Limit Order (BUY_AT or SELL_AT) allows you to set a specific price to enter or exit a position. For example, if Apple is at $190, you can set a 'BUY_AT' contract at $180. If the price drops to $180, tradr will automatically buy the shares for you. This helps you trade without constantly watching the screen."
                 )
             }
 
@@ -153,7 +153,7 @@ fun GuideScreen(navController: NavController) {
                     title = "Simulated Options (Calls & Puts)",
                     icon = Icons.Default.SwapCalls,
                     content = "Speculate on price movements with leveraged option contracts.",
-                    detailedContent = "Options give you the right to benefit from price changes without owning the stock. A 'CALL' is a bet that the price will go UP. A 'PUT' is a bet that the price will go DOWN. In TradeSim, options expire in 30 days. You pay a 'Premium' (small fee) to open the contract. If your prediction is right (In The Money) at expiration, you keep the profit! 1 contract controls 100 shares."
+                    detailedContent = "Options give you the right to benefit from price changes without owning the stock. A 'CALL' is a bet that the price will go UP. A 'PUT' is a bet that the price will go DOWN. In tradr, options expire in 30 days. You pay a 'Premium' (small fee) to open the contract. If your prediction is right (In The Money) at expiration, you keep the profit! 1 contract controls 100 shares."
                 )
             }
 
@@ -171,7 +171,7 @@ fun GuideScreen(navController: NavController) {
                     title = "Gemini AI Insights",
                     icon = Icons.Default.AutoAwesome,
                     content = "Get AI-powered analysis for any stock in your watchlist.",
-                    detailedContent = "TradeSim integrates Google Gemini to provide deep insights. It analyzes current market conditions, recent news, and technical data to give you a concise summary and outlook for specific stocks. Look for the ✨ icon in the stock detail screen."
+                    detailedContent = "tradr integrates Google Gemini to provide deep insights. It analyzes current market conditions, recent news, and technical data to give you a concise summary and outlook for specific stocks. Look for the ✨ icon in the stock detail screen."
                 )
             }
 
@@ -267,7 +267,7 @@ fun MarketTutorialScreen(onComplete: () -> Unit, onDismiss: () -> Unit) {
     val steps = listOf(
         TutorialStep(
             title = "Welcome Trader!",
-            description = "Welcome to TradeSim. Tap the icon above to see it react!",
+            description = "Welcome to tradr!",
             icon = Icons.Default.WavingHand
         ),
         TutorialStep(

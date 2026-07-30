@@ -24,7 +24,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.analytics
 import androidx.lifecycle.lifecycleScope
-import com.rahul.stocksim.ui.theme.TradeSimTheme
+import com.rahul.stocksim.ui.theme.TradrTheme
 import com.rahul.stocksim.ui.screens.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -45,6 +45,9 @@ class MainActivity : ComponentActivity() {
     
     @Inject
     lateinit var authRepository: AuthRepository
+
+    @Inject
+    lateinit var preferenceRepository: com.rahul.stocksim.data.PreferenceRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -68,6 +71,18 @@ class MainActivity : ComponentActivity() {
             val auth = Firebase.auth
             val analytics = Firebase.analytics
             val context = LocalContext.current
+
+            var showRebrandNotice by remember { 
+                mutableStateOf(!preferenceRepository.rebrandNoticeShown)
+                //mutableStateOf(true)
+            }
+
+            if (showRebrandNotice) {
+                RebrandNoticeDialog(onDismiss = {
+                    preferenceRepository.rebrandNoticeShown = true
+                    showRebrandNotice = false
+                })
+            }
 
             fun fetchAndSaveToken() {
                 Firebase.messaging.token.addOnCompleteListener { task ->
@@ -132,7 +147,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            TradeSimTheme {
+            TradrTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

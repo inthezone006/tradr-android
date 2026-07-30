@@ -166,8 +166,8 @@ fun SettingsScreen(navController: NavController) {
                         onClick = {
                             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                                 type = "text/plain"
-                                putExtra(Intent.EXTRA_SUBJECT, "Check out TradeSim!")
-                                putExtra(Intent.EXTRA_TEXT, "I'm practicing my trading skills on TradeSim: Stock Market Sim. Download it now on Google Play! https://play.google.com/store/apps/details?id=com.rahul.stocksim")
+                                putExtra(Intent.EXTRA_SUBJECT, "Check out tradr!")
+                                putExtra(Intent.EXTRA_TEXT, "I'm practicing my trading skills on tradr: Stock Market Sim. Download it now on Google Play! https://play.google.com/store/apps/details?id=com.rahul.stocksim")
                             }
                             context.startActivity(Intent.createChooser(shareIntent, "Share via"))
                         }
@@ -216,7 +216,6 @@ fun SettingsScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Logout Button
                 Button(
                     onClick = {
                         authRepository.logout()
@@ -225,7 +224,10 @@ fun SettingsScreen(navController: NavController) {
                         }
                     },
                     modifier = Modifier.fillMaxWidth().height(56.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD50000))
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFD50000),
+                        contentColor = Color.White
+                    )
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))

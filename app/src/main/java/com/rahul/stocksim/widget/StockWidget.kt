@@ -84,7 +84,7 @@ class StockWidget : GlanceAppWidget() {
                     verticalAlignment = Alignment.Vertical.CenterVertically
                 ) {
                     Text(
-                        text = "TradeSim",
+                        text = "tradr",
                         style = TextStyle(
                             color = ColorProvider(Color(0xFFBB86FC)),
                             fontWeight = FontWeight.Bold,

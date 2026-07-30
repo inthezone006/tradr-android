@@ -133,7 +133,7 @@ fun BalanceSelectionScreen(
                 .padding(24.dp)
         ) {
             Text(
-                text = "Select a starting balance for your TradeSim account. This will determine your initial trading power.",
+                text = "Select a starting balance for your tradr account. This will determine your initial trading power.",
                 color = Color.Gray,
                 fontSize = 16.sp,
                 modifier = Modifier.padding(bottom = 32.dp)

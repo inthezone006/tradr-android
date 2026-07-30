@@ -24,7 +24,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun TradeSimTheme(
+fun TradrTheme(
     darkTheme: Boolean = true,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,

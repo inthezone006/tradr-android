@@ -2,20 +2,20 @@
 <resources>
 
     <!-- Main app theme (after splash) -->
-    <style name="Theme.TradeSim" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.tradr" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/purple_500</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="android:colorBackground">#121212</item>
     </style>
 
     <!-- Splash screen theme -->
-    <style name="Theme.TradeSim.Splash" parent="Theme.SplashScreen">
+    <style name="Theme.tradr.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">#121212</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
         <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
 
         <!-- Theme to switch to after the splash screen is done -->
-        <item name="postSplashScreenTheme">@style/Theme.TradeSim</item>
+        <item name="postSplashScreenTheme">@style/Theme.tradr</item>
     </style>
 
 </resources>

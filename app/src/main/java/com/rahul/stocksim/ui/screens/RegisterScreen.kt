@@ -86,7 +86,7 @@ fun RegisterScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Join TradeSim",
+                text = "Join tradr",
                 color = Color.White,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold

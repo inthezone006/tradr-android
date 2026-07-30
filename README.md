@@ -1,6 +1,6 @@
-# 📈 TradeSim
+# 📈 tradr
 
-💸 Welcome to **TradeSim**, a high-performance and modern Android application built with **Jetpack Compose** and **Firebase**. Master the art of trading in a risk-free environment designed with a sleek aesthetic!
+💸 Welcome to **tradr**, a high-performance and modern Android application built with **Jetpack Compose** and **Firebase**. Master the art of trading in a risk-free environment designed with a sleek aesthetic!
 
 ## ✨ Features
 
@@ -56,7 +56,7 @@
 
 1. **Clone the repo**:
    ```bash
-   git clone https://github.com/yourusername/tradesim.git
+   git clone https://github.com/yourusername/tradrgit
    ```
 
 2. **Firebase Configuration**:
