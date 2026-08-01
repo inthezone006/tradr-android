@@ -78,7 +78,6 @@ fun StockRow(
                       Text(
                           text = stock.symbol,
                           style = MaterialTheme.typography.titleMedium,
-                          fontWeight = FontWeight.Bold,
                           color = Color.White
                       )
                       if (stock.isCrypto) {
@@ -113,7 +112,6 @@ fun StockRow(
                 Text(
                     text = "$${"%,.2f".format(stock.price)}",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium,
                     color = Color.White
                 )
                 Text(

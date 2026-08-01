@@ -61,14 +61,19 @@ fun MarketScreen(
                 }
             }
             is MarketUiState.Success -> {
+                // Entrance animation state
+                var listVisible by remember { mutableStateOf(false) }
+                LaunchedEffect(Unit) {
+                    listVisible = true
+                }
+
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = "Market",
                             color = Color.White,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.displayLarge,
                             modifier = Modifier.padding(bottom = 16.dp, start = 16.dp)
                         )
                     }
@@ -77,27 +82,33 @@ fun MarketScreen(
                             Text(
                                 "My Watchlist",
                                 color = Color.White,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
                             )
                         }
-                        items(state.stockList) { currentStock ->
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp, horizontal = 16.dp)
-                                    .clickable { 
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        onStockClick(currentStock) 
-                                    },
-                                color = MaterialTheme.colorScheme.surface,
-                                shape = RoundedCornerShape(12.dp)
+                        items(state.stockList.size) { index ->
+                            val currentStock = state.stockList[index]
+                            AnimatedVisibility(
+                                visible = listVisible,
+                                enter = fadeIn(animationSpec = tween(600, index * 100)) + 
+                                        slideInVertically(initialOffsetY = { 20 }, animationSpec = tween(600, index * 100))
                             ) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    StockRow(
-                                        stock = currentStock
-                                    )
+                                Surface(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp, horizontal = 16.dp)
+                                        .clickable { 
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            onStockClick(currentStock) 
+                                        },
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Column(modifier = Modifier.padding(16.dp)) {
+                                        StockRow(
+                                            stock = currentStock
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -109,18 +120,24 @@ fun MarketScreen(
                             Text(
                                 "Market News",
                                 color = Color.White,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleLarge,
                                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
                             )
                         }
-                        items(state.marketNews) { article ->
-                            NewsArticleItem(article) {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(article.url))
-                                context.startActivity(intent)
+                        items(state.marketNews.size) { index ->
+                            val article = state.marketNews[index]
+                            AnimatedVisibility(
+                                visible = listVisible,
+                                enter = fadeIn(animationSpec = tween(600, (state.stockList.size + index) * 100)) + 
+                                        slideInVertically(initialOffsetY = { 20 }, animationSpec = tween(600, (state.stockList.size + index) * 100))
+                            ) {
+                                NewsArticleItem(article) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(article.url))
+                                    context.startActivity(intent)
+                                }
+                                Spacer(modifier = Modifier.height(12.dp))
                             }
-                            Spacer(modifier = Modifier.height(12.dp))
                         }
                     }
                     

@@ -55,7 +55,7 @@ fun AchievementsScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Achievements", color = Color.White, fontWeight = FontWeight.Bold) },
+                title = { Text("Achievements", color = Color.White, style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)

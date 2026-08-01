@@ -73,8 +73,8 @@ class MainActivity : ComponentActivity() {
             val context = LocalContext.current
 
             var showRebrandNotice by remember { 
-                //mutableStateOf(!preferenceRepository.rebrandNoticeShown)
-                mutableStateOf(true)
+                mutableStateOf(!preferenceRepository.rebrandNoticeShown)
+                //mutableStateOf(true)
             }
 
             if (showRebrandNotice) {

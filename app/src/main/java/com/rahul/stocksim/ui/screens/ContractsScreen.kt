@@ -64,8 +64,7 @@ fun ContractsScreen(
                         Text(
                             text = "Contracts",
                             color = Color.White,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.displayLarge,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
                         // Buying Power Section

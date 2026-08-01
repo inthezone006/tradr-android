@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
+import androidx.compose.foundation.BorderStroke
 import com.rahul.stocksim.model.Stock
 import com.rahul.stocksim.ui.viewmodels.InsightsUiState
 import com.rahul.stocksim.ui.viewmodels.InsightsViewModel
@@ -64,8 +65,7 @@ fun InsightsScreen(
         Text(
             text = "Insights",
             color = Color.White,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.displayLarge,
             modifier = Modifier.padding(16.dp)
         )
 
@@ -168,8 +168,9 @@ fun InsightsScreen(
 fun IndexCard(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Surface(
         modifier = modifier.clickable { onClick() },
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(12.dp)
+        color = Color.White.copy(alpha = 0.05f),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -227,8 +228,9 @@ fun IndexCard(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Unit) 
 fun SectorItem(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Surface(
         modifier = modifier.clickable { onClick() },
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(12.dp)
+        color = Color.White.copy(alpha = 0.05f),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
     ) {
         Row(
             modifier = Modifier.padding(16.dp),

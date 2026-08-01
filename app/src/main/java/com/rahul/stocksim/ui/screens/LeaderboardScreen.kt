@@ -79,9 +79,8 @@ fun LeaderboardScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Leaderboard",
-                style = MaterialTheme.typography.headlineMedium,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.displayLarge,
+                color = Color.White
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -249,10 +248,10 @@ fun LeaderCard(rank: Int, user: LeaderboardUser, isCurrentUser: Boolean) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isCurrentUser) Color(0xFF2C2C2C) else MaterialTheme.colorScheme.surface
+            containerColor = if (isCurrentUser) Color.White.copy(alpha = 0.1f) else Color.White.copy(alpha = 0.05f)
         ),
-        shape = RoundedCornerShape(12.dp),
-        border = if (isCurrentUser) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, if (isCurrentUser) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.1f))
     ) {
         Row(
             modifier = Modifier.padding(16.dp),

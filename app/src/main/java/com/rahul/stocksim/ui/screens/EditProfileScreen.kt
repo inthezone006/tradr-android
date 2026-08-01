@@ -1,6 +1,7 @@
 package com.rahul.stocksim.ui.screens
 
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,7 +41,7 @@ fun EditProfileScreen(navController: NavController) {
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Edit Profile", color = Color.White, fontWeight = FontWeight.Bold) },
+                title = { Text("Edit Profile", color = Color.White, style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
@@ -66,7 +67,9 @@ fun EditProfileScreen(navController: NavController) {
             )
             Card(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     OutlinedTextField(
@@ -133,7 +136,9 @@ fun EditProfileScreen(navController: NavController) {
             )
             Card(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(

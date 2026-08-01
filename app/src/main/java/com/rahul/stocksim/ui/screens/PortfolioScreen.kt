@@ -1,5 +1,6 @@
 package com.rahul.stocksim.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,6 +19,7 @@ import androidx.compose.material3.LoadingIndicator
 import androidx.compose.runtime.*
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -78,6 +80,12 @@ fun PortfolioScreen(
                 val stockConcentration = if (totalAccountValue > 0) (totalStockValue / totalAccountValue) * 100 else 0.0
                 val singleStockConcentration = if (totalAccountValue > 0) ((largestHolding?.let { it.first.price * it.second } ?: 0.0) / totalAccountValue) * 100 else 0.0
 
+                // Entrance animation state
+                var listVisible by remember { mutableStateOf(false) }
+                LaunchedEffect(Unit) {
+                    listVisible = true
+                }
+
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -88,15 +96,17 @@ fun PortfolioScreen(
                         Text(
                             text = "Portfolio",
                             color = Color.White,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.displayLarge,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
                         // Enhanced Fintech Header with Deep Insights
                         Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                            shape = RoundedCornerShape(16.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
+                            shape = RoundedCornerShape(24.dp),
+                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
                         ) {
                             val pagerState = rememberPagerState(pageCount = { 4 })
 
@@ -155,8 +165,8 @@ fun PortfolioScreen(
                                                         Text(
                                                             text = "$${String.format("%,.2f", value)}",
                                                             color = Color.White,
-                                                            fontSize = 32.sp,
-                                                            fontWeight = FontWeight.Bold
+                                                            style = MaterialTheme.typography.displayLarge,
+                                                            fontSize = 32.sp // Override size but keep font family
                                                         )
                                                     }
                                                     
@@ -200,7 +210,6 @@ fun PortfolioScreen(
                                                         text = "Industry Diversification",
                                                         color = Color.White,
                                                         style = MaterialTheme.typography.titleLarge,
-                                                        fontWeight = FontWeight.Bold,
                                                         modifier = Modifier.padding(bottom = 16.dp)
                                                     )
                                                     VicoPieChart(
@@ -331,8 +340,7 @@ fun PortfolioScreen(
                         Text(
                             text = "Your Assets",
                             color = Color.White,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(bottom = 12.dp)
                         )
                     }
@@ -344,39 +352,46 @@ fun PortfolioScreen(
                             }
                         }
                     } else {
-                        items(portfolioItems) { (stock, quantity) ->
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp)
-                                    .clickable { 
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        navController.navigate(Screen.Details.createRoute(stock.symbol)) 
-                                    },
-                                color = MaterialTheme.colorScheme.surface,
-                                shape = RoundedCornerShape(12.dp)
+                        items(portfolioItems.size) { index ->
+                            val (stock, quantity) = portfolioItems[index]
+                            AnimatedVisibility(
+                                visible = listVisible,
+                                enter = fadeIn(animationSpec = tween(600, index * 100)) + 
+                                        slideInVertically(initialOffsetY = { 20 }, animationSpec = tween(600, index * 100))
                             ) {
-                                Column(modifier = Modifier.padding(12.dp)) {
-                                    StockRow(
-                                        stock = stock
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = "$quantity ${if (stock.isCrypto) "units" else "shares"}",
-                                            color = Color.Gray,
-                                            fontSize = 12.sp
+                                Surface(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp)
+                                        .clickable { 
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            navController.navigate(Screen.Details.createRoute(stock.symbol)) 
+                                        },
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        StockRow(
+                                            stock = stock
                                         )
-                                        Text(
-                                            text = "Value: $${String.format("%,.2f", stock.price * quantity)}",
-                                            color = Color.White,
-                                            fontSize = 14.sp,
-                                            fontWeight = FontWeight.Bold
-                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = "$quantity ${if (stock.isCrypto) "units" else "shares"}",
+                                                color = Color.Gray,
+                                                fontSize = 12.sp
+                                            )
+                                            Text(
+                                                text = "Value: $${String.format("%,.2f", stock.price * quantity)}",
+                                                color = Color.White,
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
                                     }
                                 }
                             }

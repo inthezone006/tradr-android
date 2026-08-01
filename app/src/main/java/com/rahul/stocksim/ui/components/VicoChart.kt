@@ -97,11 +97,11 @@ fun VicoLineChart(
                     areaFill = LineCartesianLayer.AreaFill.single(
                         fill(
                             DynamicShader.verticalGradient(
-                                arrayOf(chartColor.copy(alpha = 0.4f), chartColor.copy(alpha = 0f))
+                                arrayOf(chartColor.copy(alpha = 0.5f), chartColor.copy(alpha = 0f))
                             )
                         )
                     ),
-                    thickness = 2.dp,
+                    thickness = 3.dp,
                     pointConnector = LineCartesianLayer.PointConnector.cubic()
                 )
             ),
@@ -169,8 +169,10 @@ fun VicoLineChart(
 @Composable
 fun rememberCartesianMarker(history: List<StockPricePoint> = emptyList()): DefaultCartesianMarker {
     val labelBackground = rememberShapeComponent(
-        fill = fill(Color(0xFF252525)),
-        shape = CorneredShape.rounded(4f),
+        fill = fill(Color.Black.copy(alpha = 0.8f)),
+        shape = CorneredShape.rounded(8f),
+        strokeFill = fill(Color.White.copy(alpha = 0.1f)),
+        strokeThickness = 1.dp
     )
     val label = rememberTextComponent(
         color = Color.White,

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -50,6 +51,7 @@ import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import com.rahul.stocksim.data.*
 import com.rahul.stocksim.model.*
+import com.rahul.stocksim.ui.components.PillButton
 import com.rahul.stocksim.ui.components.TradingViewChart
 import com.rahul.stocksim.ui.components.VicoLineChart
 import com.rahul.stocksim.ui.viewmodels.StockDetailUiState
@@ -303,9 +305,9 @@ fun StockDetailScreen(
                                 Column {
                                     Text(
                                         text = stock.symbol,
-                                        style = MaterialTheme.typography.headlineMedium,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold
+                                        style = MaterialTheme.typography.displayLarge,
+                                        fontSize = 28.sp, // Tweak size for this specific spot
+                                        color = Color.White
                                     )
                                     Text(
                                         text = stock.name,
@@ -333,9 +335,9 @@ fun StockDetailScreen(
                                 ) { price ->
                                     Text(
                                         text = "$${String.format(Locale.US, "%.2f", price)}",
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        color = color,
-                                        fontWeight = FontWeight.Bold
+                                        style = MaterialTheme.typography.displayLarge,
+                                        fontSize = 24.sp,
+                                        color = color
                                     )
                                 }
                                 
@@ -677,49 +679,44 @@ fun StockDetailScreen(
                                     modifier = Modifier.fillMaxWidth(), 
                                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {
-                                        Button(
+                                    PillButton(
+                                        text = "BUY",
+                                        onClick = {
+                                            coroutineScope.launch {
+                                                val buyResult = viewModel.buyStock(quantityValue, stock.price)
+                                                if (buyResult.isSuccess) {
+                                                    Toast.makeText(context, "Purchase Successful", Toast.LENGTH_SHORT).show()
+                                                } else {
+                                                    Toast.makeText(context, buyResult.exceptionOrNull()?.message ?: "Purchase failed", Toast.LENGTH_SHORT).show()
+                                                }
+                                            }
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        enabled = hasEnoughMoney && quantityValue > 0,
+                                        containerColor = Color(0xFF00C853),
+                                        contentColor = Color.White
+                                    )
+                                    
+                                    if (ownedQuantity > 0) {
+                                        PillButton(
+                                            text = "SELL",
                                             onClick = {
                                                 coroutineScope.launch {
-                                                    val buyResult = viewModel.buyStock(quantityValue, stock.price)
-                                                    if (buyResult.isSuccess) {
-                                                        Toast.makeText(context, "Purchase Successful", Toast.LENGTH_SHORT).show()
+                                                    val sellResult = viewModel.sellStock(quantityValue, stock.price)
+                                                    if (sellResult.isSuccess) {
+                                                        Toast.makeText(context, "Sale Successful", Toast.LENGTH_SHORT).show()
+                                                        reviewHelper.launchReviewIfEligible()
                                                     } else {
-                                                        Toast.makeText(context, buyResult.exceptionOrNull()?.message ?: "Purchase failed", Toast.LENGTH_SHORT).show()
+                                                        Toast.makeText(context, sellResult.exceptionOrNull()?.message ?: "Sale failed", Toast.LENGTH_SHORT).show()
                                                     }
                                                 }
                                             },
                                             modifier = Modifier.weight(1f),
-                                            enabled = hasEnoughMoney && quantityValue > 0,
-                                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = Color(0xFF00C853),
-                                                contentColor = Color.White
-                                            ),
-                                            shape = RoundedCornerShape(12.dp)
-                                        ) { Text("BUY") }
-                                        
-                                        if (ownedQuantity > 0) {
-                                            Button(
-                                                onClick = {
-                                                    coroutineScope.launch {
-                                                        val sellResult = viewModel.sellStock(quantityValue, stock.price)
-                                                        if (sellResult.isSuccess) {
-                                                            Toast.makeText(context, "Sale Successful", Toast.LENGTH_SHORT).show()
-                                                            // Trigger Review on successful sale (likely to be a "Big Win" moment)
-                                                            reviewHelper.launchReviewIfEligible()
-                                                        } else {
-                                                            Toast.makeText(context, sellResult.exceptionOrNull()?.message ?: "Sale failed", Toast.LENGTH_SHORT).show()
-                                                        }
-                                                    }
-                                                },
-                                                modifier = Modifier.weight(1f),
-                                                enabled = canSellQuantity,
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = Color(0xFFD50000),
-                                                    contentColor = Color.White
-                                                ),
-                                                shape = RoundedCornerShape(12.dp)
-                                            ) { Text("SELL") }
-                                        }
+                                            enabled = canSellQuantity,
+                                            containerColor = Color(0xFFD50000),
+                                            contentColor = Color.White
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -802,8 +799,9 @@ fun StockDetailScreen(
                             Text("Market Analysis", color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 12.dp))
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                                shape = RoundedCornerShape(16.dp)
+                                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
+                                shape = RoundedCornerShape(20.dp),
+                                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
                             ) {
                                 Column {
                                     if (recommendations.isNotEmpty()) {
@@ -923,8 +921,10 @@ fun PriceAlertSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = Color.White
+        containerColor = Color(0xFF0D0D0D),
+        contentColor = Color.White,
+        scrimColor = Color.Black.copy(alpha = 0.7f),
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
         Column(
             modifier = Modifier
@@ -1029,8 +1029,10 @@ fun TradeContractSheet(
     
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = Color.White
+        containerColor = Color(0xFF0D0D0D),
+        contentColor = Color.White,
+        scrimColor = Color.Black.copy(alpha = 0.7f),
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
         Column(
             modifier = Modifier

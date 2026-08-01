@@ -25,6 +25,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.rahul.stocksim.ui.theme.JetBlack
+import com.rahul.stocksim.ui.theme.RichBlack
 import com.rahul.stocksim.ui.screens.InsightsScreen
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -217,12 +219,13 @@ fun MainScreen(
                         .fillMaxWidth()
                         .then(if (!searchActive) Modifier.padding(horizontal = 16.dp, vertical = 8.dp) else Modifier),
                     colors = SearchBarDefaults.colors(
-                        containerColor = if (searchActive) Color.Transparent else MaterialTheme.colorScheme.surface,
+                        containerColor = if (searchActive) Color.Transparent else RichBlack,
                         inputFieldColors = TextFieldDefaults.colors(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
                             focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent
+                            unfocusedContainerColor = Color.Transparent,
+                            cursorColor = MaterialTheme.colorScheme.primary
                         )
                     ),
                     tonalElevation = 0.dp
@@ -251,12 +254,11 @@ fun MainScreen(
         },
         bottomBar = {
             if (!searchActive) {
-                Box(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).navigationBarsPadding()) {
+                Box(modifier = Modifier.fillMaxWidth().background(JetBlack).navigationBarsPadding()) {
                     NavigationBar(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(64.dp)
-                            .padding(horizontal = 48.dp),
+                            .height(72.dp),
                         containerColor = Color.Transparent,
                         contentColor = Color.White,
                         tonalElevation = 0.dp,

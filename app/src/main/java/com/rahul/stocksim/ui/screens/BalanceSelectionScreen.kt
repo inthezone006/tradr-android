@@ -58,7 +58,7 @@ fun BalanceSelectionScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Set Difficulty", color = Color.White, fontWeight = FontWeight.Bold) },
+                title = { Text("Set Difficulty", color = Color.White, style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)

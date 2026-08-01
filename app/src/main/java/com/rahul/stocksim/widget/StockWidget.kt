@@ -85,11 +85,11 @@ class StockWidget : GlanceAppWidget() {
                     verticalAlignment = Alignment.Vertical.CenterVertically
                 ) {
                     Text(
-                        text = "tradr",
+                        text = "tradr.",
                         style = TextStyle(
-                            color = ColorProvider(Color(0xFFBB86FC)),
+                            color = ColorProvider(Color.White),
                             fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
+                            fontSize = 18.sp
                         )
                     )
                     Spacer(modifier = GlanceModifier.defaultWeight())
@@ -123,12 +123,12 @@ class StockWidget : GlanceAppWidget() {
                     Spacer(modifier = GlanceModifier.defaultWeight())
                     Row {
                         WidgetMode.entries.forEach { m ->
-                            Box(
-                                modifier = GlanceModifier
-                                    .size(6.dp)
-                                    .padding(horizontal = 1.dp)
-                                    .background(if (m == mode) Color(0xFFBB86FC) else Color.DarkGray)
-                            ) {}
+                    Box(
+                        modifier = GlanceModifier
+                            .size(6.dp)
+                            .padding(horizontal = 1.dp)
+                            .background(if (m == mode) Color.White else Color.DarkGray)
+                    ) {}
                         }
                     }
                 }
