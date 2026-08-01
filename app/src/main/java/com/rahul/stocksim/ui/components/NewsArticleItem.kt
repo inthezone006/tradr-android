@@ -24,7 +24,7 @@ fun NewsArticleItem(article: FinnhubNewsArticle, onClick: () -> Unit) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {

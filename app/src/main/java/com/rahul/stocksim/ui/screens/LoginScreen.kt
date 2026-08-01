@@ -78,7 +78,7 @@ fun LoginScreen(navController: NavController, initialError: String? = null) {
     }
 
     Box(
-        modifier = Modifier.fillMaxSize().background(Color(0xFF121212))
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier.fillMaxSize().systemBarsPadding().padding(32.dp),
@@ -86,7 +86,7 @@ fun LoginScreen(navController: NavController, initialError: String? = null) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
-                painter = painterResource(id = R.drawable.stock_market_sim),
+                painter = painterResource(id = R.drawable.tradr_logo_new),
                 contentDescription = "Logo",
                 modifier = Modifier.size(120.dp)
             )
@@ -101,8 +101,8 @@ fun LoginScreen(navController: NavController, initialError: String? = null) {
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.White,
-                    unfocusedBorderColor = Color.DarkGray,
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White
                 ),
@@ -119,8 +119,8 @@ fun LoginScreen(navController: NavController, initialError: String? = null) {
                 shape = RoundedCornerShape(8.dp),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.White,
-                    unfocusedBorderColor = Color.DarkGray,
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White
                 ),
@@ -153,7 +153,7 @@ fun LoginScreen(navController: NavController, initialError: String? = null) {
                     enabled = !isLoading && email.isNotEmpty() && password.isNotEmpty(),
                     modifier = Modifier.weight(1f).height(56.dp),
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color.DarkGray),
+                    border = null,
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = Color.White,
                         disabledContentColor = Color.Gray
@@ -243,7 +243,7 @@ fun LoginScreen(navController: NavController, initialError: String? = null) {
                     },
                     modifier = Modifier.weight(1f).height(56.dp),
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color.DarkGray),
+                    border = null,
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {

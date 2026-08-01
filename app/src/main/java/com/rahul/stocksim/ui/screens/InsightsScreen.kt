@@ -59,7 +59,7 @@ fun InsightsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF121212))
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Text(
             text = "Insights",
@@ -168,7 +168,7 @@ fun InsightsScreen(
 fun IndexCard(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Surface(
         modifier = modifier.clickable { onClick() },
-        color = Color(0xFF1F1F1F),
+        color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
@@ -227,7 +227,7 @@ fun IndexCard(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Unit) 
 fun SectorItem(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Surface(
         modifier = modifier.clickable { onClick() },
-        color = Color(0xFF1F1F1F),
+        color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
@@ -294,7 +294,7 @@ fun MoverItem(stock: Stock, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() },
-        color = Color(0xFF1F1F1F),
+        color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(

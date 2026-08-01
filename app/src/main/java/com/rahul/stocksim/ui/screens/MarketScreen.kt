@@ -51,7 +51,7 @@ fun MarketScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF121212)),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.TopCenter
     ) {
         when (val state = uiState) {
@@ -91,7 +91,7 @@ fun MarketScreen(
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                         onStockClick(currentStock) 
                                     },
-                                color = Color(0xFF1F1F1F),
+                                color = MaterialTheme.colorScheme.surface,
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Column(modifier = Modifier.padding(16.dp)) {

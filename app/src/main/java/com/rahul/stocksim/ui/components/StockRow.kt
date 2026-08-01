@@ -47,7 +47,7 @@ fun StockRow(
                   modifier = Modifier
                       .size(40.dp)
                       .clip(RoundedCornerShape(10.dp))
-                      .background(Color(0xFF1F1F1F)),
+                      .background(MaterialTheme.colorScheme.surface),
                   contentAlignment = Alignment.Center
               ) {
                   if (!stock.logoUrl.isNullOrEmpty()) {

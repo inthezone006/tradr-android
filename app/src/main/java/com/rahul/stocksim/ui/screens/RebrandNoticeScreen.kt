@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.rahul.stocksim.ui.theme.JetBlack
 
 @Composable
 fun RebrandNoticeDialog(
@@ -27,7 +28,7 @@ fun RebrandNoticeDialog(
     ) {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = Color(0xFF121212)
+            color = JetBlack
         ) {
             Column(
                 modifier = Modifier

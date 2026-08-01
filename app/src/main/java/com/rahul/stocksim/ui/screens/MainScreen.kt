@@ -123,7 +123,7 @@ fun MainScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFF121212),
+        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             Column {
@@ -217,7 +217,7 @@ fun MainScreen(
                         .fillMaxWidth()
                         .then(if (!searchActive) Modifier.padding(horizontal = 16.dp, vertical = 8.dp) else Modifier),
                     colors = SearchBarDefaults.colors(
-                        containerColor = if (searchActive) Color.Transparent else Color(0xFF1F1F1F),
+                        containerColor = if (searchActive) Color.Transparent else MaterialTheme.colorScheme.surface,
                         inputFieldColors = TextFieldDefaults.colors(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
@@ -251,7 +251,7 @@ fun MainScreen(
         },
         bottomBar = {
             if (!searchActive) {
-                Box(modifier = Modifier.fillMaxWidth().background(Color(0xFF1F1F1F)).navigationBarsPadding()) {
+                Box(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).navigationBarsPadding()) {
                     NavigationBar(
                         modifier = Modifier
                             .fillMaxWidth()

@@ -68,7 +68,7 @@ fun SettingsScreen(navController: NavController) {
     }
 
     Scaffold(
-        containerColor = Color(0xFF121212),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("Settings", color = Color.White, fontWeight = FontWeight.Bold) },
@@ -77,7 +77,7 @@ fun SettingsScreen(navController: NavController) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF121212))
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         }
     ) { innerPadding ->
@@ -90,7 +90,7 @@ fun SettingsScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(Color(0xFF121212))
+                .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
                 modifier = Modifier
@@ -219,7 +219,7 @@ fun SettingsScreen(navController: NavController) {
                 Button(
                     onClick = {
                         authRepository.logout()
-                        navController.navigate(Screen.Login.route) {
+                        navController.navigate(Screen.Login.createRoute()) {
                             popUpTo(Screen.Main.route) { inclusive = true }
                         }
                     },
@@ -287,7 +287,7 @@ fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) 
         )
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F))
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 content()

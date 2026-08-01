@@ -36,7 +36,7 @@ fun MacroScreen(
         onRefresh = { viewModel.refresh() },
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF121212))
+            .background(MaterialTheme.colorScheme.background)
     ) {
         when (val state = uiState) {
             is MacroUiState.Loading -> {
@@ -86,7 +86,7 @@ fun MacroScreen(
 fun EconomicEventItem(entry: FinnhubEconomicEntry) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {

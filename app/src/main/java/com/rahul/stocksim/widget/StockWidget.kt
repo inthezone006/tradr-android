@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.rahul.stocksim.ui.theme.JetBlack
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.*
@@ -70,7 +71,7 @@ class StockWidget : GlanceAppWidget() {
         Box(
             modifier = GlanceModifier
                 .fillMaxSize()
-                .background(Color(0xFF121212))
+                .background(JetBlack)
                 .clickable(actionRunCallback<ToggleModeAction>())
         ) {
             Column(

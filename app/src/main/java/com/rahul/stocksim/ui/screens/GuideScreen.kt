@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rahul.stocksim.data.AuthRepository
+import com.rahul.stocksim.ui.theme.DarkGrayBlack
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -52,7 +53,7 @@ fun GuideScreen(navController: NavController) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF121212)),
+            .background(MaterialTheme.colorScheme.background),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -201,7 +202,7 @@ fun TutorialCard(isCompleted: Boolean, onClick: () -> Unit) {
             .height(160.dp)
             .clickable { onClick() },
         colors = CardDefaults.cardColors(
-            containerColor = if (isCompleted) Color(0xFF2C2C2C) else MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+            containerColor = if (isCompleted) DarkGrayBlack else MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
         ),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -304,7 +305,7 @@ fun MarketTutorialScreen(onComplete: () -> Unit, onDismiss: () -> Unit) {
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color(0xFF121212)
+        color = MaterialTheme.colorScheme.background
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -514,7 +515,7 @@ fun TutorialSearchBarPreview() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         TextField(
@@ -539,7 +540,7 @@ fun TutorialSearchBarPreview() {
 fun TradePreview(onConfirm: () -> Unit) {
     Card(
         modifier = Modifier.padding(horizontal = 32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
@@ -574,7 +575,7 @@ fun TradePreview(onConfirm: () -> Unit) {
 fun PortfolioPreview() {
     Card(
         modifier = Modifier.padding(horizontal = 32.dp).fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -601,7 +602,7 @@ fun PortfolioItemPreview(symbol: String, returns: String, color: Color) {
 fun LeaderboardPreview() {
     Card(
         modifier = Modifier.padding(horizontal = 32.dp).fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -630,7 +631,7 @@ fun LeaderboardItemPreview(rank: Int, name: String, value: String, rankColor: Co
 fun ContractsPreview() {
     Card(
         modifier = Modifier.padding(horizontal = 32.dp).fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -662,7 +663,7 @@ fun ContractsPreview() {
 fun AIIntelligencePreview() {
     Card(
         modifier = Modifier.padding(horizontal = 32.dp).fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -777,7 +778,7 @@ fun GuideSection(title: String, icon: ImageVector, content: String, detailedCont
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showDialog = true 
             },
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -816,7 +817,7 @@ fun GuideSection(title: String, icon: ImageVector, content: String, detailedCont
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            containerColor = Color(0xFF1F1F1F),
+            containerColor = MaterialTheme.colorScheme.surface,
             titleContentColor = Color.White,
             textContentColor = Color.LightGray,
             icon = {

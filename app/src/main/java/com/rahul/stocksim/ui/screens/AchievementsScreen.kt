@@ -52,7 +52,7 @@ fun AchievementsScreen(
     val achievements by viewModel.achievements.collectAsState()
 
     Scaffold(
-        containerColor = Color(0xFF121212),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("Achievements", color = Color.White, fontWeight = FontWeight.Bold) },
@@ -61,7 +61,7 @@ fun AchievementsScreen(
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF121212))
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         }
     ) { padding ->
@@ -94,7 +94,7 @@ fun AchievementsScreen(
 fun AchievementItem(achievement: Achievement) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = if (achievement.isUnlocked) Color(0xFF1F1F1F) else Color(0xFF1A1A1A)
+            containerColor = if (achievement.isUnlocked) MaterialTheme.colorScheme.surface else Color(0xFF1A1A1A)
         ),
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()

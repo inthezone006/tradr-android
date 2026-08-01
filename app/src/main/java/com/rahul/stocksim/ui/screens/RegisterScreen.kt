@@ -65,7 +65,7 @@ fun RegisterScreen(navController: NavController) {
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = Color(0xFF121212)
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -78,19 +78,12 @@ fun RegisterScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
-                painter = painterResource(id = R.drawable.stock_market_sim),
+                painter = painterResource(id = R.drawable.tradr_logo_new),
                 contentDescription = "Logo",
-                modifier = Modifier.size(80.dp)
+                modifier = Modifier.size(120.dp)
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                text = "Join tradr",
-                color = Color.White,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
+            Spacer(modifier = Modifier.height(8.dp))
             
             Text(
                 text = "Enter your details to get started",
@@ -110,8 +103,8 @@ fun RegisterScreen(navController: NavController) {
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White,
-                    focusedBorderColor = Color.White,
-                    unfocusedBorderColor = Color.DarkGray
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent
                 ),
             )
 
@@ -131,8 +124,8 @@ fun RegisterScreen(navController: NavController) {
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White,
-                    focusedBorderColor = Color.White,
-                    unfocusedBorderColor = Color.DarkGray
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent
                 ),
             )
 
@@ -158,7 +151,7 @@ fun RegisterScreen(navController: NavController) {
                     enabled = !isLoading && isFormValid,
                     modifier = Modifier.weight(1f).height(56.dp),
                     shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(1.dp, if (isFormValid) Color.White else Color.DarkGray),
+                    border = null,
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = Color.White,
                         disabledContentColor = Color.Gray
@@ -230,7 +223,7 @@ fun RegisterScreen(navController: NavController) {
                     },
                     modifier = Modifier.weight(1f).height(56.dp),
                     shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(1.dp, Color.DarkGray),
+                    border = null,
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
                 ) {
                     Image(
@@ -245,7 +238,7 @@ fun RegisterScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextButton(onClick = { navController.navigate(Screen.Login.route) }) {
+            TextButton(onClick = { navController.navigate(Screen.Login.createRoute()) }) {
                 Text(text = "Already have an account? Sign in", color = Color.Gray)
             }
         }

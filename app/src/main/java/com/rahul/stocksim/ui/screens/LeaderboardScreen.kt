@@ -72,7 +72,7 @@ fun LeaderboardScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().background(Color(0xFF121212))
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
     ) {
         // Static Header Area
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -249,7 +249,7 @@ fun LeaderCard(rank: Int, user: LeaderboardUser, isCurrentUser: Boolean) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isCurrentUser) Color(0xFF2C2C2C) else Color(0xFF1F1F1F)
+            containerColor = if (isCurrentUser) Color(0xFF2C2C2C) else MaterialTheme.colorScheme.surface
         ),
         shape = RoundedCornerShape(12.dp),
         border = if (isCurrentUser) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null

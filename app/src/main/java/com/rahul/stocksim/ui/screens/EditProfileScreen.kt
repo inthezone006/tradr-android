@@ -37,7 +37,7 @@ fun EditProfileScreen(navController: NavController) {
     var isDeleting by remember { mutableStateOf(false) }
 
     Scaffold(
-        containerColor = Color(0xFF121212),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text("Edit Profile", color = Color.White, fontWeight = FontWeight.Bold) },
@@ -46,7 +46,7 @@ fun EditProfileScreen(navController: NavController) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF121212))
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
         }
     ) { innerPadding ->
@@ -66,7 +66,7 @@ fun EditProfileScreen(navController: NavController) {
             )
             Card(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     OutlinedTextField(
@@ -133,7 +133,7 @@ fun EditProfileScreen(navController: NavController) {
             )
             Card(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
@@ -165,7 +165,7 @@ fun EditProfileScreen(navController: NavController) {
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { if (!isDeleting) showDeleteDialog = false },
-            containerColor = Color(0xFF1F1F1F),
+            containerColor = MaterialTheme.colorScheme.surface,
             title = { Text("Permanently Delete Account?", color = Color.White) },
             text = { 
                 Text(
@@ -182,7 +182,7 @@ fun EditProfileScreen(navController: NavController) {
                             isDeleting = false
                             if (result.isSuccess) {
                                 Toast.makeText(context, "Account deleted successfully", Toast.LENGTH_SHORT).show()
-                                navController.navigate(Screen.Login.route) {
+                                navController.navigate(Screen.Login.createRoute()) {
                                     popUpTo(0) { inclusive = true }
                                 }
                             } else {
@@ -190,7 +190,7 @@ fun EditProfileScreen(navController: NavController) {
                                 if (error.contains("recent-login")) {
                                     Toast.makeText(context, "Please log in again before deleting your account for security purposes.", Toast.LENGTH_LONG).show()
                                     authRepository.logout()
-                                    navController.navigate(Screen.Login.route) {
+                                    navController.navigate(Screen.Login.createRoute()) {
                                         popUpTo(0) { inclusive = true }
                                     }
                                 } else {

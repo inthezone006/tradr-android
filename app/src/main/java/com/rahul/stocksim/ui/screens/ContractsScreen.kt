@@ -45,7 +45,7 @@ fun ContractsScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF121212))
+            .background(MaterialTheme.colorScheme.background)
     ) {
         when (val state = uiState) {
             is PortfolioUiState.Loading -> {
@@ -71,7 +71,7 @@ fun ContractsScreen(
                         // Buying Power Section
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F))
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                         ) {
                             Column(modifier = Modifier.padding(20.dp)) {
                                 Text(text = "Buying Power", color = Color.Gray, fontSize = 14.sp)
@@ -159,7 +159,7 @@ fun ContractRow(contract: TradeContract, onCancel: (() -> Unit)? = null, onExecu
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier
@@ -281,7 +281,7 @@ fun ContractRow(contract: TradeContract, onCancel: (() -> Unit)? = null, onExecu
                                 Text("Cancel", color = Color.Gray)
                             }
                         },
-                        containerColor = Color(0xFF1F1F1F),
+                        containerColor = MaterialTheme.colorScheme.surface,
                         titleContentColor = Color.White,
                         textContentColor = Color.LightGray
                     )

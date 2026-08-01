@@ -56,7 +56,7 @@ fun PortfolioScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF121212))
+            .background(MaterialTheme.colorScheme.background)
     ) {
         when (val state = uiState) {
             is PortfolioUiState.Loading -> {
@@ -95,7 +95,7 @@ fun PortfolioScreen(
                         // Enhanced Fintech Header with Deep Insights
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F)),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                             shape = RoundedCornerShape(16.dp)
                         ) {
                             val pagerState = rememberPagerState(pageCount = { 4 })
@@ -353,7 +353,7 @@ fun PortfolioScreen(
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                         navController.navigate(Screen.Details.createRoute(stock.symbol)) 
                                     },
-                                color = Color(0xFF1F1F1F),
+                                color = MaterialTheme.colorScheme.surface,
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Column(modifier = Modifier.padding(12.dp)) {
@@ -398,7 +398,7 @@ fun PortfolioScreen(
             if (analysis != null) {
                 ModalBottomSheet(
                     onDismissRequest = { showAiSheet = false },
-                    containerColor = Color(0xFF1F1F1F),
+                    containerColor = MaterialTheme.colorScheme.surface,
                     scrimColor = Color.Black.copy(alpha = 0.6f)
                 ) {
                     Column(

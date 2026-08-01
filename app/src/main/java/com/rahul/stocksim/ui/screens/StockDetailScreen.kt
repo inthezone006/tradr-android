@@ -97,7 +97,7 @@ fun StockDetailScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFF121212),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { 
@@ -213,7 +213,7 @@ fun StockDetailScreen(
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF121212), titleContentColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background, titleContentColor = Color.White)
             )
         }
     ) { innerPadding ->
@@ -254,7 +254,7 @@ fun StockDetailScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
-                        .background(Color(0xFF121212))
+                        .background(MaterialTheme.colorScheme.background)
                         .pointerInput(Unit) {
                             detectTapGestures(onTap = {
                                 focusManager.clearFocus()
@@ -276,7 +276,7 @@ fun StockDetailScreen(
                                     modifier = Modifier
                                         .size(56.dp)
                                         .clip(RoundedCornerShape(14.dp))
-                                        .background(Color(0xFF1F1F1F)),
+                                        .background(MaterialTheme.colorScheme.surface),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     if (profile?.logo?.isNotEmpty() == true) {
@@ -406,7 +406,7 @@ fun StockDetailScreen(
                                     .fillMaxWidth()
                                     .height(300.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(Color(0xFF1F1F1F).copy(alpha = 0.5f))
+                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
                             ) {
                                 if (isGraphLoading) {
                                     LoadingIndicator(modifier = Modifier.align(Alignment.Center), color = MaterialTheme.colorScheme.primary)
@@ -518,7 +518,7 @@ fun StockDetailScreen(
 
                     // --- BUY/SELL SECTION ---
                     item {
-                        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F))) {
+                        Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                             Column(modifier = Modifier.padding(20.dp)) {
                                 // Balance and Position Info
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -733,7 +733,7 @@ fun StockDetailScreen(
                         item {
                             Spacer(modifier = Modifier.height(24.dp))
                             Text("Key Statistics", color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 12.dp))
-                            Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F))) {
+                            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                                 Column(modifier = Modifier.padding(16.dp)) {
                                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                         val mktCap = (stats.metric?.get("marketCapitalization") as? Number)?.toDouble()
@@ -784,7 +784,7 @@ fun StockDetailScreen(
                         val nextEarnings = earnings.earningsCalendar.first()
                         item {
                             Spacer(modifier = Modifier.height(24.dp))
-                            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F).copy(alpha = 0.5f))) {
+                            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))) {
                                 Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                                     Icon(Icons.Default.Event, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                                     Spacer(modifier = Modifier.width(12.dp))
@@ -802,7 +802,7 @@ fun StockDetailScreen(
                             Text("Market Analysis", color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 12.dp))
                             Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F)),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                 shape = RoundedCornerShape(16.dp)
                             ) {
                                 Column {
@@ -848,7 +848,7 @@ fun StockDetailScreen(
                                         selected = false,
                                         onClick = { navController.navigate(Screen.Details.createRoute(peer)) },
                                         label = { Text(peer) },
-                                        colors = FilterChipDefaults.filterChipColors(labelColor = Color.White, containerColor = Color(0xFF1F1F1F))
+                                        colors = FilterChipDefaults.filterChipColors(labelColor = Color.White, containerColor = MaterialTheme.colorScheme.surface)
                                     )
                                 }
                             }
@@ -923,7 +923,7 @@ fun PriceAlertSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF1F1F1F),
+        containerColor = MaterialTheme.colorScheme.surface,
         contentColor = Color.White
     ) {
         Column(
@@ -1029,7 +1029,7 @@ fun TradeContractSheet(
     
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF1F1F1F),
+        containerColor = MaterialTheme.colorScheme.surface,
         contentColor = Color.White
     ) {
         Column(
@@ -1360,7 +1360,7 @@ fun SimulatedOptionsView(stock: Stock, viewModel: StockDetailViewModel) {
 fun AIRecommendationSection(recommendation: AIRecommendation) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp)
     ) {
         AIRecommendationContent(recommendation)
@@ -1476,7 +1476,7 @@ fun AIAnalysisSection(analysis: String?, onExpand: () -> Unit) {
                 if (expanded && analysis == null) onExpand()
             }
             .animateContentSize(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -1622,7 +1622,7 @@ fun InsiderTradingSection(transactions: List<FinnhubInsiderTransaction>) {
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 12.dp)
         )
-        Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F))) {
+        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
             Column(modifier = Modifier.padding(16.dp)) {
                 transactions.take(5).forEach { tx ->
                     Row(
@@ -1686,7 +1686,7 @@ fun StatItem(label: String, value: String, alignment: Alignment.Horizontal = Ali
 fun NewsArticleItem(article: FinnhubNewsArticle, onClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1F1F1F)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
