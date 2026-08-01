@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.rahul.stocksim.ui.theme.DarkGrayBlack
 import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import com.rahul.stocksim.data.*
@@ -797,11 +798,10 @@ fun StockDetailScreen(
                         item {
                             Spacer(modifier = Modifier.height(24.dp))
                             Text("Market Analysis", color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 12.dp))
-                            Card(
+                            Surface(
                                 modifier = Modifier.fillMaxWidth(),
-                                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
-                                shape = RoundedCornerShape(20.dp),
-                                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+                                color = DarkGrayBlack,
+                                shape = RoundedCornerShape(20.dp)
                             ) {
                                 Column {
                                     if (recommendations.isNotEmpty()) {
@@ -1469,7 +1469,7 @@ fun AIRecommendationContent(recommendation: AIRecommendation) {
 fun AIAnalysisSection(analysis: String?, onExpand: () -> Unit) {
     var expanded by remember { mutableStateOf(false) }
 
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 16.dp)
@@ -1478,7 +1478,7 @@ fun AIAnalysisSection(analysis: String?, onExpand: () -> Unit) {
                 if (expanded && analysis == null) onExpand()
             }
             .animateContentSize(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
