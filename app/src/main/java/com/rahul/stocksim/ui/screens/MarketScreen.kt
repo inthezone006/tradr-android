@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -61,11 +60,7 @@ fun MarketScreen(
                 }
             }
             is MarketUiState.Success -> {
-                // Entrance animation state
-                var listVisible by remember { mutableStateOf(false) }
-                LaunchedEffect(Unit) {
-                    listVisible = true
-                }
+
 
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     item {
@@ -88,27 +83,21 @@ fun MarketScreen(
                         }
                         items(state.stockList.size) { index ->
                             val currentStock = state.stockList[index]
-                            AnimatedVisibility(
-                                visible = listVisible,
-                                enter = fadeIn(animationSpec = tween(600, index * 100)) + 
-                                        slideInVertically(initialOffsetY = { 20 }, animationSpec = tween(600, index * 100))
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp, horizontal = 16.dp)
+                                    .clickable { 
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        onStockClick(currentStock) 
+                                    },
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(12.dp)
                             ) {
-                                Surface(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp, horizontal = 16.dp)
-                                        .clickable { 
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            onStockClick(currentStock) 
-                                        },
-                                    color = MaterialTheme.colorScheme.surface,
-                                    shape = RoundedCornerShape(12.dp)
-                                ) {
-                                    Column(modifier = Modifier.padding(16.dp)) {
-                                        StockRow(
-                                            stock = currentStock
-                                        )
-                                    }
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    StockRow(
+                                        stock = currentStock
+                                    )
                                 }
                             }
                         }
@@ -126,18 +115,12 @@ fun MarketScreen(
                         }
                         items(state.marketNews.size) { index ->
                             val article = state.marketNews[index]
-                            AnimatedVisibility(
-                                visible = listVisible,
-                                enter = fadeIn(animationSpec = tween(600, (state.stockList.size + index) * 100)) + 
-                                        slideInVertically(initialOffsetY = { 20 }, animationSpec = tween(600, (state.stockList.size + index) * 100))
-                            ) {
-                                NewsArticleItem(article) {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(article.url))
-                                    context.startActivity(intent)
-                                }
-                                Spacer(modifier = Modifier.height(12.dp))
+                            NewsArticleItem(article) {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(article.url))
+                                context.startActivity(intent)
                             }
+                            Spacer(modifier = Modifier.height(12.dp))
                         }
                     }
                     
