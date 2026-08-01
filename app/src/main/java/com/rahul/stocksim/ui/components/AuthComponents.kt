@@ -41,7 +41,7 @@ fun ModernTextField(
             Text(
                 text = label, 
                 style = MaterialTheme.typography.bodyMedium,
-                color = if (isFocused) MaterialTheme.colorScheme.primary else Color.Gray
+                color = if (isFocused) Color.White else Color.Gray
             ) 
         },
         visualTransformation = visualTransformation,
@@ -52,7 +52,7 @@ fun ModernTextField(
             focusedContainerColor = RichBlack,
             unfocusedContainerColor = RichBlack.copy(alpha = 0.5f),
             disabledContainerColor = RichBlack.copy(alpha = 0.3f),
-            cursorColor = MaterialTheme.colorScheme.primary,
+            cursorColor = Color.White,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             focusedTextColor = Color.White,
@@ -61,6 +61,7 @@ fun ModernTextField(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PillButton(
     text: String,
@@ -68,7 +69,7 @@ fun PillButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     isLoading: Boolean = false,
-    containerColor: Color = MaterialTheme.colorScheme.primary,
+    containerColor: Color = Color.White,
     contentColor: Color = Color.Black,
     icon: @Composable (() -> Unit)? = null
 ) {
@@ -83,14 +84,14 @@ fun PillButton(
             .fillMaxWidth()
             .height(56.dp),
         enabled = enabled && !isLoading,
-        shape = RoundedCornerShape(28.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = contentColor,
-            disabledContainerColor = Color.DarkGray,
-            disabledContentColor = Color.Gray
+            disabledContainerColor = containerColor.copy(alpha = 0.5f),
+            disabledContentColor = contentColor.copy(alpha = 0.5f)
         ),
-        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp, pressedElevation = 4.dp)
+        shape = RoundedCornerShape(28.dp),
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
     ) {
         if (isLoading) {
             CircularProgressIndicator(

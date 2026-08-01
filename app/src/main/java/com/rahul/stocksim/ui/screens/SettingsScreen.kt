@@ -150,7 +150,7 @@ fun SettingsScreen(navController: NavController) {
                                         Toast.makeText(context, "Verification email sent!", Toast.LENGTH_SHORT).show()
                                     }
                                 }) {
-                                    Text("Verify Now", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp)
+                                    Text("Verify Now", color = Color.White, fontSize = 12.sp)
                                 }
                             }
                         }
@@ -283,7 +283,7 @@ fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) 
         Text(
             text = title,
             style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.primary,
+            color = Color.White,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(vertical = 8.dp)
         )

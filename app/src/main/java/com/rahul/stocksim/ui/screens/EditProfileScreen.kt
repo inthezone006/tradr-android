@@ -61,7 +61,7 @@ fun EditProfileScreen(navController: NavController) {
             // Edit Name Section
             Text(
                 "Identity",
-                color = MaterialTheme.colorScheme.primary,
+                color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp
             )

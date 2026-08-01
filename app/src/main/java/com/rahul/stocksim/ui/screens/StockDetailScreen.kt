@@ -204,7 +204,7 @@ fun StockDetailScreen(
                             Icon(
                                 imageVector = Icons.Default.NotificationsActive,
                                 contentDescription = "Set Alert",
-                                tint = if (priceAlerts.isNotEmpty()) MaterialTheme.colorScheme.primary else Color.White
+                                tint = Color.White
                             )
                         }
                         IconButton(onClick = { 
@@ -414,7 +414,7 @@ fun StockDetailScreen(
                                     .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
                             ) {
                                 if (isGraphLoading) {
-                                    LoadingIndicator(modifier = Modifier.align(Alignment.Center), color = MaterialTheme.colorScheme.primary)
+                                    LoadingIndicator(modifier = Modifier.align(Alignment.Center), color = Color.White)
                                 } else if (history.isNotEmpty()) {
                                     Column {
                                         VicoLineChart(
@@ -629,7 +629,7 @@ fun StockDetailScreen(
                                     if (activeContracts.isNotEmpty()) {
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Surface(
-                                            color = MaterialTheme.colorScheme.primary,
+                                            color = Color.White,
                                             shape = CircleShape,
                                             modifier = Modifier.size(20.dp)
                                         ) {
@@ -780,9 +780,9 @@ fun StockDetailScreen(
                         val nextEarnings = earnings.earningsCalendar.first()
                         item {
                             Spacer(modifier = Modifier.height(24.dp))
-                            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))) {
+                            Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f))) {
                                 Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.Event, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                                    Icon(Icons.Default.Event, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Text("Next Earnings: ", color = Color.Gray, fontSize = 14.sp)
                                     Text(text = formatDate(nextEarnings.date), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
@@ -945,7 +945,7 @@ fun PriceAlertSheet(
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    focusedBorderColor = Color.White,
                     unfocusedBorderColor = Color.Gray,
                     focusedTextColor = Color.White,
                     unfocusedTextColor = Color.White
@@ -1049,7 +1049,7 @@ fun TradeContractSheet(
             TabRow(
                 selectedTabIndex = selectedTab,
                 containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.primary,
+                contentColor = Color.White,
                 divider = {}
             ) {
                 Tab(
@@ -1305,12 +1305,12 @@ fun SimulatedOptionsView(stock: Stock, viewModel: StockDetailViewModel) {
         val totalCost = adjustedPremium * 100 * contractsQuantity
         
         Card(
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f)),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Info, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.Info, null, tint = Color.White, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Option Details", color = Color.White, fontWeight = FontWeight.Bold)
                 }
@@ -1338,8 +1338,8 @@ fun SimulatedOptionsView(stock: Stock, viewModel: StockDetailViewModel) {
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.White
+                containerColor = Color.White,
+                contentColor = Color.Black
             )
         ) {
             Text("Buy $contractsQuantity Contract${if (contractsQuantity > 1) "s" else ""}")
@@ -1379,7 +1379,7 @@ fun AIRecommendationContent(recommendation: AIRecommendation) {
                 Icon(
                     imageVector = Icons.Default.AutoAwesome,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = Color.White,
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -1452,7 +1452,7 @@ fun AIRecommendationContent(recommendation: AIRecommendation) {
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                    tint = Color.White.copy(alpha = 0.6f),
                     modifier = Modifier.size(14.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
@@ -1701,7 +1701,7 @@ fun NewsArticleItem(article: FinnhubNewsArticle, onClick: () -> Unit) {
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = article.source.uppercase(), color = MaterialTheme.colorScheme.primary, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                Text(text = article.source.uppercase(), color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 Text(text = article.headline, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(text = article.summary, color = Color.Gray, fontSize = 12.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)

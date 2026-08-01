@@ -230,7 +230,7 @@ fun CurrentUserSummary(rank: Int?, userValue: Double) {
                 Text("Portfolio Value", color = Color.Gray, fontSize = 12.sp)
                 Text(
                     text = "$${String.format("%,.2f", userValue)}",
-                    color = MaterialTheme.colorScheme.primary,
+                    color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -247,7 +247,7 @@ fun CurrentUserSummary(rank: Int?, userValue: Double) {
 fun LeaderCard(rank: Int, user: LeaderboardUser, isCurrentUser: Boolean) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = if (isCurrentUser) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface,
+        color = if (isCurrentUser) Color.White.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
@@ -260,7 +260,7 @@ fun LeaderCard(rank: Int, user: LeaderboardUser, isCurrentUser: Boolean) {
                     1 -> Color(0xFFFFD700) // Gold
                     2 -> Color(0xFFC0C0C0) // Silver
                     3 -> Color(0xFFCD7F32) // Bronze
-                    else -> if (isCurrentUser) MaterialTheme.colorScheme.primary else Color.Gray
+                    else -> if (isCurrentUser) Color.White else Color.Gray
                 },
                 fontWeight = FontWeight.Bold,
                 fontSize = if (rank >= 100) 14.sp else 18.sp,
@@ -312,7 +312,7 @@ fun LeaderCard(rank: Int, user: LeaderboardUser, isCurrentUser: Boolean) {
 
             Text(
                 text = "$${String.format("%,.0f", user.totalAccountValue)}",
-                color = if (isCurrentUser) MaterialTheme.colorScheme.primary else Color.White,
+                color = Color.White,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )

@@ -109,7 +109,7 @@ fun AchievementItem(achievement: Achievement) {
                 modifier = Modifier
                     .size(56.dp)
                     .clip(CircleShape)
-                    .background(if (achievement.isUnlocked) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.DarkGray.copy(alpha = 0.3f)),
+                    .background(if (achievement.isUnlocked) Color.White.copy(alpha = 0.1f) else Color.DarkGray.copy(alpha = 0.3f)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -150,7 +150,7 @@ fun AchievementItem(achievement: Achievement) {
                     LinearProgressIndicator(
                         progress = { achievement.progress / achievement.target },
                         modifier = Modifier.fillMaxWidth().height(4.dp).clip(CircleShape),
-                        color = MaterialTheme.colorScheme.primary,
+                        color = Color.White,
                         trackColor = Color.White.copy(alpha = 0.1f)
                     )
                 }

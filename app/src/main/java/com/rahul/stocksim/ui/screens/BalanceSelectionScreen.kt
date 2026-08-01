@@ -106,7 +106,7 @@ fun BalanceSelectionScreen(
                                 selected = isSelected,
                                 onClick = null,
                                 colors = RadioButtonDefaults.colors(
-                                    selectedColor = MaterialTheme.colorScheme.primary,
+                                    selectedColor = Color.White,
                                     unselectedColor = Color.DarkGray
                                 )
                             )

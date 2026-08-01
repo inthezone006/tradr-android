@@ -225,7 +225,7 @@ fun MainScreen(
                             unfocusedTextColor = Color.White,
                             focusedContainerColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent,
-                            cursorColor = MaterialTheme.colorScheme.primary
+                            cursorColor = Color.White
                         )
                     ),
                     tonalElevation = 0.dp
@@ -286,7 +286,7 @@ fun MainScreen(
                                         badge = {
                                             if (item == BottomNavItem.Guide && !isTutorialCompleted) {
                                                 Badge(
-                                                    containerColor = MaterialTheme.colorScheme.primary,
+                                                    containerColor = Color.White,
                                                     modifier = Modifier.size(8.dp)
                                                 )
                                             }

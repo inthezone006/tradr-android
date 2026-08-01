@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.rahul.stocksim.ui.theme.TradrTheme
 import androidx.compose.runtime.Composable
@@ -45,7 +46,7 @@ fun RebrandNoticeDialog(
                         imageVector = Icons.Default.Info,
                         contentDescription = null,
                         modifier = Modifier.size(32.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = Color.White
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
@@ -78,7 +79,7 @@ fun RebrandNoticeDialog(
                         Text(
                             text = "🚀 Coming Soon",
                             style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = Color.White,
                             fontWeight = FontWeight.Bold
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -99,7 +100,7 @@ fun RebrandNoticeDialog(
                 ) {
                     Text(
                         text = "Got it!",
-                        color = MaterialTheme.colorScheme.primary,
+                        color = Color.White,
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleMedium
                     )

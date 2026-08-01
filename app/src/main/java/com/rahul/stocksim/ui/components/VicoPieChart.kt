@@ -20,7 +20,7 @@ fun VicoPieChart(
     if (data.isEmpty()) return
 
     val chartColors = listOf(
-        Color(0xFFBB86FC),
+        Color.White,
         Color(0xFF03DAC6),
         Color(0xFFCF6679),
         Color(0xFF00C853),

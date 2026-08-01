@@ -31,7 +31,7 @@ fun NewsArticleItem(article: FinnhubNewsArticle, onClick: () -> Unit) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = article.source.uppercase(),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = Color.White,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold
                 )

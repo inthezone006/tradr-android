@@ -226,7 +226,7 @@ fun PortfolioScreen(
                                                         value = "$${String.format("%,.2f", totalStockValue)}",
                                                         subValue = "${String.format("%.1f%%", stockConcentration)} of total",
                                                         icon = Icons.Default.BarChart,
-                                                        color = MaterialTheme.colorScheme.primary
+                                                        color = Color.White
                                                     )
                                                     InsightSummaryItem(
                                                         modifier = Modifier.weight(1f),
@@ -268,7 +268,7 @@ fun PortfolioScreen(
                                                 val analysis = state.aiAnalysis
                                                 if (analysis != null) {
                                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFFBB86FC))
+                                                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White)
                                                         Spacer(modifier = Modifier.width(8.dp))
                                                         Text("AI Portfolio Analysis", color = Color.White, fontWeight = FontWeight.Bold)
                                                     }
@@ -297,7 +297,7 @@ fun PortfolioScreen(
                                                     Column(modifier = Modifier.fillMaxHeight()) {
                                                         analysis.recommendations.forEach { rec ->
                                                             Row(verticalAlignment = Alignment.Top, modifier = Modifier.padding(bottom = 6.dp)) {
-                                                                Text("•", color = Color(0xFFBB86FC), fontSize = 14.sp, modifier = Modifier.padding(end = 4.dp))
+                                                                Text("•", color = Color.White, fontSize = 14.sp, modifier = Modifier.padding(end = 4.dp))
                                                                 Text(rec, color = Color.Gray, fontSize = 13.sp, lineHeight = 18.sp)
                                                             }
                                                         }
@@ -308,7 +308,7 @@ fun PortfolioScreen(
                                                         verticalArrangement = Arrangement.Center,
                                                         horizontalAlignment = Alignment.CenterHorizontally
                                                     ) {
-                                                        LoadingIndicator(color = Color(0xFFBB86FC), modifier = Modifier.size(32.dp))
+                                                        LoadingIndicator(color = Color.White, modifier = Modifier.size(32.dp))
                                                         Spacer(modifier = Modifier.height(16.dp))
                                                         Text("Gemini is analyzing your portfolio...", color = Color.Gray, fontSize = 12.sp)
                                                     }
@@ -324,7 +324,7 @@ fun PortfolioScreen(
                                     modifier = Modifier
                                         .align(Alignment.CenterHorizontally)
                                         .padding(bottom = 12.dp),
-                                    activeColor = MaterialTheme.colorScheme.primary,
+                                    activeColor = Color.White,
                                     inactiveColor = Color.Gray.copy(alpha = 0.5f),
                                     indicatorWidth = 8.dp,
                                     indicatorHeight = 8.dp,
@@ -422,7 +422,7 @@ fun PortfolioScreen(
                             .padding(bottom = 32.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFFBB86FC))
+                            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White)
                             Spacer(modifier = Modifier.width(12.dp))
                             Text("Full AI Portfolio Analysis", color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                         }
@@ -467,7 +467,7 @@ fun PortfolioScreen(
                                 horizontalArrangement = Arrangement.Start,
                                 verticalAlignment = Alignment.Top
                             ) {
-                                Text("•", color = Color(0xFFBB86FC), fontWeight = FontWeight.Bold, modifier = Modifier.padding(end = 6.dp))
+                                Text("•", color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.padding(end = 6.dp))
                                 Text(rec, color = Color.Gray, fontSize = 14.sp, lineHeight = 20.sp)
                             }
                         }
@@ -476,7 +476,7 @@ fun PortfolioScreen(
                         Button(
                             onClick = { showAiSheet = false },
                             modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFBB86FC))
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
                         ) {
                             Text("Got it", color = Color.Black, fontWeight = FontWeight.Bold)
                         }
