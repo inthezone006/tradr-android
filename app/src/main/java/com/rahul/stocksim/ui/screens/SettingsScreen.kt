@@ -287,11 +287,10 @@ fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) 
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(vertical = 8.dp)
         )
-        Card(
+        Surface(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
-            shape = RoundedCornerShape(20.dp),
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+            color = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(20.dp)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 content()

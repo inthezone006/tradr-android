@@ -100,13 +100,12 @@ fun PortfolioScreen(
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
                         // Enhanced Fintech Header with Deep Insights
-                        Card(
+                        Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
-                            shape = RoundedCornerShape(24.dp),
-                            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = RoundedCornerShape(24.dp)
                         ) {
                             val pagerState = rememberPagerState(pageCount = { 4 })
 
@@ -440,9 +439,10 @@ fun PortfolioScreen(
                                     Text(analysis.riskLevel, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                                 }
                             }
-                            Card(
+                            Surface(
                                 modifier = Modifier.weight(1f),
-                                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f))
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(12.dp)
                             ) {
                                 Column(modifier = Modifier.padding(16.dp)) {
                                     Text("Diversification", color = Color.Gray, fontSize = 12.sp)
@@ -498,7 +498,7 @@ fun InsightSummaryItem(
 ) {
     Surface(
         modifier = modifier,
-        color = Color.White.copy(alpha = 0.03f),
+        color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {

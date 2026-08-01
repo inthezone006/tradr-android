@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import com.rahul.stocksim.ui.theme.DarkGrayBlack
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -208,9 +209,8 @@ fun LeaderboardScreen(
 fun CurrentUserSummary(rank: Int?, userValue: Double) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+        color = DarkGrayBlack,
+        shape = RoundedCornerShape(16.dp)
     ) {
         Row(
             modifier = Modifier.padding(20.dp),
@@ -245,13 +245,10 @@ fun CurrentUserSummary(rank: Int?, userValue: Double) {
 
 @Composable
 fun LeaderCard(rank: Int, user: LeaderboardUser, isCurrentUser: Boolean) {
-    Card(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isCurrentUser) Color.White.copy(alpha = 0.1f) else Color.White.copy(alpha = 0.05f)
-        ),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, if (isCurrentUser) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.1f))
+        color = if (isCurrentUser) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(16.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
