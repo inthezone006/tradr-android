@@ -184,7 +184,7 @@ fun GuideScreen(navController: NavController) {
                 ) {
                     Text(
                         text = "Knowledge is the best asset! 📈",
-                        color = MaterialTheme.colorScheme.primary,
+                        color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 18.sp
                     )
@@ -202,7 +202,7 @@ fun TutorialCard(isCompleted: Boolean, onClick: () -> Unit) {
             .height(160.dp)
             .clickable { onClick() },
         colors = CardDefaults.cardColors(
-            containerColor = if (isCompleted) DarkGrayBlack else MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+            containerColor = if (isCompleted) DarkGrayBlack else Color.White
         ),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -215,13 +215,13 @@ fun TutorialCard(isCompleted: Boolean, onClick: () -> Unit) {
                 Text(
                     text = "Interactive Tutorial",
                     style = MaterialTheme.typography.headlineSmall,
-                    color = if (isCompleted) Color.Gray else Color.White,
+                    color = if (isCompleted) Color.Gray else Color.Black,
                     fontWeight = FontWeight.ExtraBold
                 )
                 Text(
                     text = "Master the basics of trading",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (isCompleted) Color.DarkGray else Color.White.copy(alpha = 0.8f)
+                    color = if (isCompleted) Color.DarkGray else Color.Black.copy(alpha = 0.8f)
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -232,15 +232,15 @@ fun TutorialCard(isCompleted: Boolean, onClick: () -> Unit) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Completed", color = Color.Gray, fontWeight = FontWeight.Bold)
                     } else {
-                        Icon(Icons.Default.RadioButtonUnchecked, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
+                        Icon(Icons.Default.RadioButtonUnchecked, contentDescription = null, tint = Color.Black, modifier = Modifier.size(24.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Start Training", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("Start Training", color = Color.Black, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.width(8.dp))
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
                                 .clip(CircleShape)
-                                .background(Color.White)
+                                .background(Color.Black)
                         )
                     }
                 }
@@ -249,7 +249,7 @@ fun TutorialCard(isCompleted: Boolean, onClick: () -> Unit) {
             Icon(
                 imageVector = Icons.Default.PlayCircle,
                 contentDescription = null,
-                tint = if (isCompleted) Color.DarkGray else Color.White.copy(alpha = 0.3f),
+                tint = if (isCompleted) Color.DarkGray else Color.Black.copy(alpha = 0.3f),
                 modifier = Modifier
                     .size(120.dp)
                     .align(Alignment.CenterEnd)
@@ -388,7 +388,7 @@ fun MarketTutorialScreen(onComplete: () -> Unit, onDismiss: () -> Unit) {
                     ) {
                         repeat(steps.size) { index ->
                             val size by animateDpAsState(if (index == currentStep) 12.dp else 8.dp, label = "dotSize")
-                            val color by animateColorAsState(if (index == currentStep) MaterialTheme.colorScheme.primary else Color.DarkGray, label = "dotColor")
+                            val color by animateColorAsState(if (index == currentStep) Color.White else Color.DarkGray, label = "dotColor")
                             Box(
                                 modifier = Modifier
                                     .padding(horizontal = 8.dp)
@@ -671,7 +671,7 @@ fun AIIntelligencePreview() {
             Spacer(modifier = Modifier.height(16.dp))
             
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.CalendarMonth, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                Icon(Icons.Default.CalendarMonth, null, tint = Color.White, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text("CPI Inflation Data", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
@@ -682,7 +682,7 @@ fun AIIntelligencePreview() {
             Spacer(modifier = Modifier.height(16.dp))
             
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.AutoAwesome, null, tint = Color(0xFF8E24AA), modifier = Modifier.size(20.dp))
+                Icon(Icons.Default.AutoAwesome, null, tint = Color.White, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(12.dp))
                 Text("Gemini: Bullish outlook for NVDA based on recent earnings...", color = Color.LightGray, fontSize = 12.sp, lineHeight = 16.sp)
             }
@@ -718,7 +718,7 @@ fun AnimatedGraphic(icon: ImageVector, stepIndex: Int, onInteraction: () -> Unit
             .graphicsLayer { translationY = floatOffset }
             .scale(scale)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+            .background(Color.White.copy(alpha = 0.1f))
             .clickable { 
                 onInteraction()
                 coroutineScope.launch {
@@ -732,7 +732,7 @@ fun AnimatedGraphic(icon: ImageVector, stepIndex: Int, onInteraction: () -> Unit
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = Color.White,
             modifier = Modifier.size(80.dp)
         )
         
@@ -757,7 +757,7 @@ fun AnimatedGraphic(icon: ImageVector, stepIndex: Int, onInteraction: () -> Unit
                 modifier = Modifier
                     .size(8.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                    .background(Color.White.copy(alpha = 0.5f))
                     .align(Alignment.TopCenter)
             )
         }
@@ -786,7 +786,7 @@ fun GuideSection(title: String, icon: ImageVector, content: String, detailedCont
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = Color.White,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
@@ -808,7 +808,7 @@ fun GuideSection(title: String, icon: ImageVector, content: String, detailedCont
             Text(
                 text = "Tap to learn more →",
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary,
+                color = Color.White,
                 fontWeight = FontWeight.Medium
             )
         }
@@ -824,7 +824,7 @@ fun GuideSection(title: String, icon: ImageVector, content: String, detailedCont
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = Color.White
                 )
             },
             title = {
@@ -847,7 +847,7 @@ fun GuideSection(title: String, icon: ImageVector, content: String, detailedCont
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     showDialog = false 
                 }) {
-                    Text("Got it!", color = MaterialTheme.colorScheme.primary)
+                    Text("Got it!", color = Color.White)
                 }
             }
         )

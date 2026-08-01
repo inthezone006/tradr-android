@@ -3,6 +3,8 @@ package com.rahul.stocksim.ui.screens
 import android.app.Activity
 import android.content.Intent
 import android.widget.Toast
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -447,15 +449,11 @@ fun StockDetailScreen(
                                                     },
                                                     colors = FilterChipDefaults.filterChipColors(
                                                         labelColor = Color.Gray,
-                                                        selectedLabelColor = Color.White,
-                                                        selectedContainerColor = MaterialTheme.colorScheme.primary
+                                                        selectedLabelColor = Color.Black,
+                                                        selectedContainerColor = Color.White,
+                                                        containerColor = Color.Transparent
                                                     ),
-                                                    border = FilterChipDefaults.filterChipBorder(
-                                                        borderColor = Color.DarkGray,
-                                                        selectedBorderColor = MaterialTheme.colorScheme.primary,
-                                                        enabled = true,
-                                                        selected = selectedPeriod == period
-                                                    )
+                                                    border = null
                                                 )
                                             }
                                         }
@@ -1481,7 +1479,15 @@ fun AIAnalysisSection(analysis: String?, onExpand: () -> Unit) {
         color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(16.dp)
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(20.dp)
+                .then(
+                    if (expanded && analysis != null) {
+                        Modifier.heightIn(max = 400.dp)
+                    } else Modifier
+                )
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1491,7 +1497,7 @@ fun AIAnalysisSection(analysis: String?, onExpand: () -> Unit) {
                     Icon(
                         imageVector = Icons.Default.Psychology,
                         contentDescription = null,
-                        tint = Color(0xFFBB86FC),
+                        tint = Color.White,
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(12.dp))
@@ -1512,10 +1518,12 @@ fun AIAnalysisSection(analysis: String?, onExpand: () -> Unit) {
             if (expanded) {
                 Spacer(modifier = Modifier.height(16.dp))
                 if (analysis != null) {
-                    MarkdownText(
-                        markdown = analysis,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    Box(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        MarkdownText(
+                            markdown = analysis,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 } else {
                     Box(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
@@ -1523,7 +1531,7 @@ fun AIAnalysisSection(analysis: String?, onExpand: () -> Unit) {
                     ) {
                         LoadingIndicator(
                             modifier = Modifier.size(24.dp),
-                            color = Color(0xFFBB86FC)
+                            color = Color.White
                         )
                     }
                 }
