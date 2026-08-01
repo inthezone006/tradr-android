@@ -73,16 +73,11 @@ class MainActivity : ComponentActivity() {
             val context = LocalContext.current
 
             var showRebrandNotice by remember { 
-                mutableStateOf(!preferenceRepository.rebrandNoticeShown)
                 //mutableStateOf(true)
+                mutableStateOf(!preferenceRepository.rebrandNoticeShown)
             }
 
-            if (showRebrandNotice) {
-                RebrandNoticeDialog(onDismiss = {
-                    preferenceRepository.rebrandNoticeShown = true
-                    showRebrandNotice = false
-                })
-            }
+
 
             fun fetchAndSaveToken() {
                 Firebase.messaging.token.addOnCompleteListener { task ->
@@ -148,6 +143,12 @@ class MainActivity : ComponentActivity() {
             }
 
             TradrTheme {
+                if (showRebrandNotice) {
+                    RebrandNoticeDialog(onDismiss = {
+                        preferenceRepository.rebrandNoticeShown = true
+                        showRebrandNotice = false
+                    })
+                }
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
