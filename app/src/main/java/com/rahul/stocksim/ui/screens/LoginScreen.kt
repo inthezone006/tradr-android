@@ -5,25 +5,25 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.os.Build
 import android.util.Log
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
@@ -31,14 +31,15 @@ import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.navigation.NavController
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.rahul.stocksim.R
 import com.rahul.stocksim.data.AuthRepository
+import com.rahul.stocksim.ui.components.ModernTextField
+import com.rahul.stocksim.ui.components.PillButton
 import com.rahul.stocksim.util.NotificationHelper
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-// Helper function to safely find Activity from Context
 private fun Context.findActivity(): Activity? {
     var context = this
     while (context is ContextWrapper) {
@@ -48,7 +49,6 @@ private fun Context.findActivity(): Activity? {
     return null
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoginScreen(navController: NavController, initialError: String? = null) {
     val authRepository = AuthRepository()
@@ -61,6 +61,13 @@ fun LoginScreen(navController: NavController, initialError: String? = null) {
     val coroutineScope = rememberCoroutineScope()
     val credentialManager = CredentialManager.create(context)
     val notificationHelper = remember { NotificationHelper(context) }
+
+    // Staggered animation states
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(100)
+        visible = true
+    }
 
     val handlePostLogin = {
         coroutineScope.launch {
@@ -78,196 +85,180 @@ fun LoginScreen(navController: NavController, initialError: String? = null) {
     }
 
     Box(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .systemBarsPadding()
+            .imePadding()
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().systemBarsPadding().padding(32.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.Start
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.tradr_logo_new),
-                contentDescription = "Logo",
-                modifier = Modifier.size(120.dp)
-            )
+            // Header Section with Staggered Animation
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn(animationSpec = tween(600)) + slideInVertically(initialOffsetY = { 20 }, animationSpec = tween(600))
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.tradr_logo_new),
+                    contentDescription = "Logo",
+                    modifier = Modifier.size(100.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn(animationSpec = tween(600, 100)) + slideInVertically(initialOffsetY = { 30 }, animationSpec = tween(600, 100))
+            ) {
+                Column {
+                    Text(
+                        text = "Sign in",
+                        style = MaterialTheme.typography.displayLarge,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "Sign in to continue your trading journey",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Gray
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text(text = "Email", color = Color.LightGray) },
-                shape = RoundedCornerShape(8.dp),
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White
-                ),
-            )
+            // Inputs Section
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn(animationSpec = tween(600, 200)) + slideInVertically(initialOffsetY = { 40 }, animationSpec = tween(600, 200))
+            ) {
+                Column {
+                    ModernTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = "Email"
+                    )
 
-            Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text(text = "Password", color = Color.LightGray) },
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent,
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White
-                ),
-            )
+                    ModernTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = "Password",
+                        visualTransformation = PasswordVisualTransformation()
+                    )
+                }
+            }
 
             if (errorMessage != null) {
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(text = errorMessage!!, color = MaterialTheme.colorScheme.error)
+                Text(
+                    text = errorMessage!!, 
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(48.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            // Buttons Section
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn(animationSpec = tween(600, 300)) + slideInVertically(initialOffsetY = { 50 }, animationSpec = tween(600, 300))
             ) {
-                // Sign in button
-                OutlinedButton(
-                    onClick = {
-                        isLoading = true
-                        authRepository.login(email, password) { success, error ->
-                            isLoading = false
-                            if (success) {
-                                handlePostLogin()
-                            } else {
-                                errorMessage = error ?: "Registration failed"
+                Column {
+                    PillButton(
+                        text = "Sign in",
+                        onClick = {
+                            isLoading = true
+                            authRepository.login(email, password) { success, error ->
+                                isLoading = false
+                                if (success) {
+                                    handlePostLogin()
+                                } else {
+                                    errorMessage = error ?: "Login failed"
+                                }
                             }
-                        }
-                    },
-                    enabled = !isLoading && email.isNotEmpty() && password.isNotEmpty(),
-                    modifier = Modifier.weight(1f).height(56.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    border = null,
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color.White,
-                        disabledContentColor = Color.Gray
+                        },
+                        enabled = email.isNotEmpty() && password.isNotEmpty(),
+                        isLoading = isLoading
                     )
-                ) {
-                    if (isLoading) {
-                        LoadingIndicator(
-                            color = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    } else {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Login,
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    PillButton(
+                        text = "Continue with Google",
+                        onClick = {
+                            val googleIdOption = GetGoogleIdOption.Builder()
+                                .setServerClientId(WEB_CLIENT_ID)
+                                .setFilterByAuthorizedAccounts(false)
+                                .setAutoSelectEnabled(false)
+                                .build()
+
+                            val request = GetCredentialRequest.Builder()
+                                .addCredentialOption(googleIdOption)
+                                .build()
+
+                            coroutineScope.launch {
+                                try {
+                                    val activity = context.findActivity() ?: return@launch
+                                    val result = credentialManager.getCredential(request = request, context = activity)
+                                    val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(result.credential.data)
+                                    val signInResult = authRepository.signInWithGoogle(googleIdTokenCredential.idToken)
+                                    signInResult.onSuccess { isNewUser ->
+                                        val user = authRepository.currentUser
+                                        if (isNewUser) {
+                                            navController.navigate(Screen.PasswordSetup.createRoute(false, user?.displayName, user?.email))
+                                        } else {
+                                            if (authRepository.isProfileCreated()) handlePostLogin()
+                                            else navController.navigate(Screen.BalanceSelection.createRoute(user?.displayName, user?.email))
+                                        }
+                                    }.onFailure { e ->
+                                        errorMessage = "Google Auth Failed: ${e.message}"
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("Auth", "Google Sign-in failed", e)
+                                    errorMessage = (e as? GetCredentialException)?.message ?: "Google Sign-in failed"
+                                }
+                            }
+                        },
+                        containerColor = Color.White,
+                        contentColor = Color.Black,
+                        icon = {
+                            Image(
+                                painter = painterResource(id = R.drawable.android_light_rd_na),
                                 contentDescription = null,
                                 modifier = Modifier.size(20.dp)
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Sign in", fontWeight = FontWeight.Medium)
                         }
-                    }
-                }
+                    )
 
-                // Google sign in button
-                OutlinedButton(
-                    onClick = {
-                        // Use GetGoogleIdOption for a more flexible flow that can handle re-auth issues
-                        val googleIdOption = GetGoogleIdOption.Builder()
-                            .setServerClientId(WEB_CLIENT_ID)
-                            .setFilterByAuthorizedAccounts(false)
-                            .setAutoSelectEnabled(false)
-                            .build()
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                        val request = GetCredentialRequest.Builder()
-                            .addCredentialOption(googleIdOption)
-                            .build()
-
-                        coroutineScope.launch {
-                            try {
-                                val activity = context.findActivity()
-                                if (activity == null) {
-                                    errorMessage = "Internal Error: Activity not found"
-                                    return@launch
-                                }
-                                val result = credentialManager.getCredential(
-                                    request = request,
-                                    context = activity
-                                )
-                                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(result.credential.data)
-                                val signInResult = authRepository.signInWithGoogle(googleIdTokenCredential.idToken)
-                                signInResult.onSuccess { isNewUser ->
-                                    val user = authRepository.currentUser
-                                    if (isNewUser) {
-                                        navController.navigate(Screen.PasswordSetup.createRoute(
-                                            isChangePassword = false,
-                                            name = user?.displayName,
-                                            email = user?.email
-                                        )) {
-                                            popUpTo(Screen.Login.route) { inclusive = true }
-                                        }
-                                    } else {
-                                        coroutineScope.launch {
-                                            if (authRepository.isProfileCreated()) {
-                                                handlePostLogin()
-                                            } else {
-                                                navController.navigate(Screen.BalanceSelection.createRoute(
-                                                    name = user?.displayName,
-                                                    email = user?.email
-                                                )) {
-                                                    popUpTo(Screen.Login.route) { inclusive = true }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }.onFailure { e ->
-                                    errorMessage = "Firebase Google Auth Failed: ${e.message}"
-                                }
-                            } catch (e: GetCredentialException) {
-                                Log.e("Auth", "Google Sign-in failed", e)
-                                errorMessage = when (e) {
-                                    is GetCredentialCancellationException -> "Sign-in cancelled"
-                                    is NoCredentialException -> "No Google accounts found. Please check your device accounts or SHA-1 configuration in Firebase."
-                                    else -> e.message ?: "Google Sign-in failed"
-                                }
+                    TextButton(
+                        onClick = {
+                            navController.navigate(Screen.Register.route) {
+                                popUpTo(Screen.Login.route) { inclusive = true }
                             }
-                        }
-                    },
-                    modifier = Modifier.weight(1f).height(56.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    border = null,
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(
-                            painter = painterResource(id = R.drawable.android_light_rd_na),
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
+                        },
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        Text(
+                            text = "Don't have an account? Sign up", 
+                            color = Color.Gray,
+                            style = MaterialTheme.typography.labelLarge
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Google", fontWeight = FontWeight.Medium)
                     }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            TextButton(
-                onClick = {
-                    navController.navigate(Screen.Register.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
-                    }
-                }
-            ) {
-                Text(text = "Don't have an account? Sign up", color = Color.Gray)
             }
         }
     }

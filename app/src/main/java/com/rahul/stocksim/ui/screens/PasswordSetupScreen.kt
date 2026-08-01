@@ -3,14 +3,12 @@ package com.rahul.stocksim.ui.screens
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LoadingIndicator
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,9 +19,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.rahul.stocksim.data.AuthRepository
+import com.rahul.stocksim.ui.components.ModernTextField
+import com.rahul.stocksim.ui.components.PillButton
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordSetupScreen(
     navController: NavController, 
@@ -40,7 +40,6 @@ fun PasswordSetupScreen(
     var confirmPassword by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
-    // Password validation logic
     val hasMinLength = password.length >= 8
     val hasUppercase = password.any { it.isUpperCase() }
     val hasDigit = password.any { it.isDigit() }
@@ -55,7 +54,7 @@ fun PasswordSetupScreen(
             coroutineScope.launch {
                 authRepository.deleteCurrentUser()
                 isLoading = false
-                navController.navigate(Screen.Login.route) {
+                navController.navigate(Screen.Login.createRoute()) {
                     popUpTo(0) { inclusive = true }
                 }
             }
@@ -79,144 +78,107 @@ fun PasswordSetupScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    if (isPasswordValid) {
-                        if (isChangePassword) {
-                            isLoading = true
-                            coroutineScope.launch {
-                                val result = authRepository.updatePassword(password)
-                                isLoading = false
-                                if (result.isSuccess) navController.popBackStack()
-                                else snackbarHostState.showSnackbar("Error: ${result.exceptionOrNull()?.localizedMessage}")
-                            }
-                        } else {
-                            val currentUser = authRepository.currentUser
-                            if (currentUser != null) {
-                                // Google user setting a password for the first time
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .imePadding()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = if (isChangePassword) 
+                        "Confirm your current identity and choose a new secure password." 
+                        else "Create a secure password for your account. You can use this to sign in later with your email.",
+                    color = Color.Gray,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(bottom = 32.dp)
+                )
+
+                if (isChangePassword) {
+                    ModernTextField(
+                        value = oldPassword,
+                        onValueChange = { oldPassword = it },
+                        label = "Current Password",
+                        visualTransformation = PasswordVisualTransformation()
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                ModernTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = if (isChangePassword) "New Password" else "Choose Password",
+                    visualTransformation = PasswordVisualTransformation()
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                ModernTextField(
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it },
+                    label = "Confirm Password",
+                    visualTransformation = PasswordVisualTransformation()
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Text("Password Requirements", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(12.dp))
+                RequirementItem("At least 8 characters", hasMinLength)
+                RequirementItem("At least one uppercase letter", hasUppercase)
+                RequirementItem("At least one digit", hasDigit)
+                RequirementItem("At least one special character", hasSpecial)
+                RequirementItem("Passwords must match", passwordsMatch)
+                if (isChangePassword) {
+                    RequirementItem("Current password required", oldPassword.isNotEmpty())
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.height(48.dp))
+
+                PillButton(
+                    text = if (isChangePassword) "Change Password" else "Complete Setup",
+                    onClick = {
+                        if (isPasswordValid) {
+                            if (isChangePassword) {
                                 isLoading = true
                                 coroutineScope.launch {
                                     val result = authRepository.updatePassword(password)
                                     isLoading = false
-                                    if (result.isSuccess) {
-                                        navController.navigate(
-                                            Screen.BalanceSelection.createRoute(
-                                                name = initialName ?: currentUser.displayName,
-                                                email = initialEmail ?: currentUser.email,
-                                                password = null // No need to pass password to register again
-                                            )
-                                        )
-                                    } else {
-                                        snackbarHostState.showSnackbar("Error linking password: ${result.exceptionOrNull()?.localizedMessage}")
-                                    }
+                                    if (result.isSuccess) navController.popBackStack()
+                                    else snackbarHostState.showSnackbar("Error: ${result.exceptionOrNull()?.localizedMessage}")
                                 }
                             } else {
-                                // Standard registration flow
-                                navController.navigate(
-                                    Screen.BalanceSelection.createRoute(
-                                        name = initialName,
-                                        email = initialEmail,
-                                        password = password
-                                    )
-                                )
+                                val currentUser = authRepository.currentUser
+                                if (currentUser != null) {
+                                    isLoading = true
+                                    coroutineScope.launch {
+                                        val result = authRepository.updatePassword(password)
+                                        isLoading = false
+                                        if (result.isSuccess) {
+                                            navController.navigate(Screen.BalanceSelection.createRoute(initialName ?: currentUser.displayName, initialEmail ?: currentUser.email, null))
+                                        } else {
+                                            snackbarHostState.showSnackbar("Error linking password: ${result.exceptionOrNull()?.localizedMessage}")
+                                        }
+                                    }
+                                } else {
+                                    navController.navigate(Screen.BalanceSelection.createRoute(initialName, initialEmail, password))
+                                }
                             }
                         }
-                    }
-                },
-                containerColor = if (isPasswordValid) MaterialTheme.colorScheme.primary else Color.DarkGray,
-                contentColor = Color.White
-            ) {
-                if (isLoading) {
-                    LoadingIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-                } else {
-                    Icon(Icons.Default.Check, contentDescription = "Confirm")
-                }
-            }
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(24.dp)
-        ) {
-            Text(
-                text = if (isChangePassword) 
-                    "Confirm your current identity and choose a new secure password." 
-                    else "Create a secure password for your account. You can use this to sign in later with your email.",
-                color = Color.Gray,
-                fontSize = 14.sp,
-                modifier = Modifier.padding(bottom = 32.dp)
-            )
-
-            if (isChangePassword) {
-                OutlinedTextField(
-                    value = oldPassword,
-                    onValueChange = { oldPassword = it },
-                    label = { Text("Current Password") },
-                    visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.DarkGray
-                    ),
-                    leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Color.Gray) }
+                    },
+                    enabled = isPasswordValid,
+                    isLoading = isLoading
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text(if (isChangePassword) "New Password" else "Choose Password") },
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedBorderColor = Color.White,
-                    unfocusedBorderColor = Color.DarkGray
-                ),
-                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Color.Gray) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = confirmPassword,
-                onValueChange = { confirmPassword = it },
-                label = { Text("Confirm Password") },
-                visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedBorderColor = Color.White,
-                    unfocusedBorderColor = Color.DarkGray
-                ),
-                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Color.Gray) }
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text("Password Requirements:", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            RequirementItem("At least 8 characters", hasMinLength)
-            RequirementItem("At least one uppercase letter", hasUppercase)
-            RequirementItem("At least one digit", hasDigit)
-            RequirementItem("At least one special character", hasSpecial)
-            RequirementItem("Passwords must match", passwordsMatch)
-            if (isChangePassword) {
-                RequirementItem("Current password required", oldPassword.isNotEmpty())
             }
         }
     }
@@ -238,7 +200,7 @@ fun RequirementItem(text: String, isMet: Boolean) {
         Text(
             text = text,
             color = if (isMet) Color.White else Color.Gray,
-            fontSize = 12.sp
+            fontSize = 13.sp
         )
     }
 }

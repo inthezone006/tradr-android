@@ -51,8 +51,7 @@ fun RebrandNoticeDialog(
                     Text(
                         text = "TradeSim is now tradr",
                         color = Color.White,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.headlineMedium
                     )
                 }
 
