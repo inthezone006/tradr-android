@@ -1,10 +1,13 @@
 package com.rahul.stocksim.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -41,6 +44,9 @@ fun ContractsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val contracts by viewModel.contracts.collectAsState()
     val executedContracts by viewModel.executedContracts.collectAsState()
+
+    var selectedContract by remember { mutableStateOf<TradeContract?>(null) }
+    var showActionSheet by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -99,10 +105,9 @@ fun ContractsScreen(
                         items(contracts) { contract ->
                             ContractRow(
                                 contract = contract,
-                                onCancel = { viewModel.cancelContract(contract.id) },
-                                onExecute = {
-                                    // Simulated execution/close position
-                                    viewModel.closeOptionPosition(contract)
+                                onClick = {
+                                    selectedContract = contract
+                                    showActionSheet = true
                                 }
                             )
                         }
@@ -123,7 +128,7 @@ fun ContractsScreen(
 
                     if (executedContracts.isNotEmpty()) {
                         items(executedContracts) { contract ->
-                            ContractRow(contract, onCancel = null)
+                            ContractRow(contract)
                         }
                     }
 
@@ -142,6 +147,21 @@ fun ContractsScreen(
                     
                     item { Spacer(modifier = Modifier.height(32.dp)) }
                 }
+
+                if (showActionSheet && selectedContract != null) {
+                    ContractActionSheet(
+                        contract = selectedContract!!,
+                        onDismiss = { showActionSheet = false },
+                        onCancel = {
+                            viewModel.cancelContract(it.id)
+                            showActionSheet = false
+                        },
+                        onExecute = {
+                            viewModel.closeOptionPosition(it)
+                            showActionSheet = false
+                        }
+                    )
+                }
             }
             is PortfolioUiState.Error -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -153,11 +173,12 @@ fun ContractsScreen(
 }
 
 @Composable
-fun ContractRow(contract: TradeContract, onCancel: (() -> Unit)? = null, onExecute: (() -> Unit)? = null) {
+fun ContractRow(contract: TradeContract, onClick: (() -> Unit)? = null) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp)
+            .let { if (onClick != null) it.clickable { onClick() } else it },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
@@ -260,44 +281,7 @@ fun ContractRow(contract: TradeContract, onCancel: (() -> Unit)? = null, onExecu
                 )
             }
             if (contract.status == ContractStatus.PENDING) {
-                var showCloseConfirm by remember { mutableStateOf(false) }
-                
-                if (showCloseConfirm) {
-                    AlertDialog(
-                        onDismissRequest = { showCloseConfirm = false },
-                        title = { Text("Close Position?") },
-                        text = { Text("Are you sure you want to close this option position? If it's currently profitable, you'll secure your gains.") },
-                        confirmButton = {
-                            TextButton(onClick = { 
-                                onExecute?.invoke()
-                                showCloseConfirm = false
-                            }) {
-                                Text("Close Position", color = Color(0xFF03DAC5))
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showCloseConfirm = false }) {
-                                Text("Cancel", color = Color.Gray)
-                            }
-                        },
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        titleContentColor = Color.White,
-                        textContentColor = Color.LightGray
-                    )
-                }
-
-                Row {
-                    if (onExecute != null && (contract.type == ContractType.CALL_OPTION || contract.type == ContractType.PUT_OPTION)) {
-                        TextButton(onClick = { showCloseConfirm = true }) {
-                            Text("Close", color = Color(0xFF03DAC5))
-                        }
-                    }
-                    if (onCancel != null) {
-                        IconButton(onClick = onCancel) {
-                            Icon(Icons.Default.Close, contentDescription = "Cancel", tint = Color.Red)
-                        }
-                    }
-                }
+                // No button here as per user request
             } else {
                 // Show date
                 Text(
@@ -309,6 +293,154 @@ fun ContractRow(contract: TradeContract, onCancel: (() -> Unit)? = null, onExecu
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ContractActionSheet(
+    contract: TradeContract,
+    onDismiss: () -> Unit,
+    onCancel: (TradeContract) -> Unit,
+    onExecute: (TradeContract) -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        scrimColor = Color.Black.copy(alpha = 0.7f),
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp)
+                .padding(bottom = 32.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    val label = when (contract.type) {
+                        ContractType.BUY_AT -> "Limit Buy"
+                        ContractType.SELL_AT -> "Limit Sell"
+                        ContractType.CALL_OPTION -> "Call Option"
+                        ContractType.PUT_OPTION -> "Put Option"
+                    }
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "${contract.symbol} Contract",
+                        color = Color.Gray,
+                        fontSize = 14.sp
+                    )
+                }
+                
+                if (!contract.logoUrl.isNullOrEmpty()) {
+                    AsyncImage(
+                        model = contract.logoUrl,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(12.dp)),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Position Details", 
+                        fontWeight = FontWeight.Bold, 
+                        color = Color.White,
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    DetailItem("Execution Target", "$${String.format("%.2f", contract.targetPrice)}")
+                    DetailItem("Quantity", "${contract.quantity} ${if(contract.quantity == 1L) "Unit" else "Units"}")
+                    
+                    if (contract.premium > 0) {
+                        DetailItem("Premium Paid", "$${String.format("%.2f", contract.premium)}")
+                        val totalCost = contract.premium * 100 * contract.quantity
+                        DetailItem("Total Investment", "$${String.format("%,.2f", totalCost)}")
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            val isOption = contract.type == ContractType.CALL_OPTION || contract.type == ContractType.PUT_OPTION
+            
+            if (isOption) {
+                Button(
+                    onClick = { onExecute(contract) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF4CAF50),
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Close Position & Settle", fontWeight = FontWeight.Bold)
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+            
+            OutlinedButton(
+                onClick = { onCancel(contract) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = Color(0xFFF44336)
+                ),
+                border = BorderStroke(1.dp, Color(0xFFF44336).copy(alpha = 0.5f)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = if (isOption) "Cancel Active Order" else "Cancel Contract", 
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Keep Contract", color = Color.Gray, fontWeight = FontWeight.Medium)
+            }
+        }
+    }
+}
+
+@Composable
+private fun DetailItem(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label, color = Color.Gray, fontSize = 13.sp)
+        Text(text = value, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+    }
+}
+
 
 @Composable
 fun PositionRow(stock: Stock, quantity: Long, mainNavController: NavController, isOld: Boolean = false) {

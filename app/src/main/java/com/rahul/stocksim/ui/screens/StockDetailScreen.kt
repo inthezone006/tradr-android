@@ -919,14 +919,15 @@ fun PriceAlertSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF0D0D0D),
-        contentColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
         scrimColor = Color.Black.copy(alpha = 0.7f),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(24.dp)
                 .padding(bottom = 32.dp)
         ) {
@@ -945,11 +946,14 @@ fun PriceAlertSheet(
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.White,
-                    unfocusedBorderColor = Color.Gray,
                     focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White
-                )
+                    unfocusedTextColor = Color.White,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = Color.Gray
+                ),
+                shape = RoundedCornerShape(12.dp)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -959,13 +963,21 @@ fun PriceAlertSheet(
                 FilterChip(
                     selected = alertIsAbove,
                     onClick = { alertIsAbove = true },
-                    label = { Text("Above") }
+                    label = { Text("Above") },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                        selectedLabelColor = MaterialTheme.colorScheme.primary
+                    )
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 FilterChip(
                     selected = !alertIsAbove,
                     onClick = { alertIsAbove = false },
-                    label = { Text("Below") }
+                    label = { Text("Below") },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                        selectedLabelColor = MaterialTheme.colorScheme.primary
+                    )
                 )
             }
 
@@ -1027,14 +1039,15 @@ fun TradeContractSheet(
     
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF0D0D0D),
-        contentColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
         scrimColor = Color.Black.copy(alpha = 0.7f),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(24.dp)
                 .padding(bottom = 32.dp)
         ) {
@@ -1080,7 +1093,15 @@ fun TradeContractSheet(
                         prefix = { Text("$") },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White)
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedLabelColor = Color.Gray
+                        ),
+                        shape = RoundedCornerShape(12.dp)
                     )
                     
                     OutlinedTextField(
@@ -1089,7 +1110,15 @@ fun TradeContractSheet(
                         label = { Text("Quantity") },
                         modifier = Modifier.weight(0.6f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White)
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedLabelColor = Color.Gray
+                        ),
+                        shape = RoundedCornerShape(12.dp)
                     )
                 }
 
@@ -1106,10 +1135,10 @@ fun TradeContractSheet(
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF00796B),
+                            containerColor = Color(0xFF4CAF50),
                             contentColor = Color.White
                         ),
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(12.dp)
                     ) { Text("Buy At Target") }
                     
                     Button(
@@ -1122,10 +1151,10 @@ fun TradeContractSheet(
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFD32F2F),
+                            containerColor = Color(0xFFF44336),
                             contentColor = Color.White
                         ),
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(12.dp)
                     ) { Text("Sell At Target") }
                 }
             } else {
@@ -1138,86 +1167,106 @@ fun TradeContractSheet(
             if (activeContracts.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(32.dp))
                 Text("Pending Contracts", fontWeight = FontWeight.Bold, color = Color.Gray)
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 activeContracts.forEach { contract ->
                     Card(
-                        modifier = Modifier.padding(vertical = 4.dp).fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f))
+                        modifier = Modifier.padding(vertical = 6.dp).fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.07f)),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column {
-                                val label = when(contract.type) {
-                                    ContractType.BUY_AT -> "Buy"
-                                    ContractType.SELL_AT -> "Sell"
-                                    ContractType.CALL_OPTION -> "Call"
-                                    ContractType.PUT_OPTION -> "Put"
-                                }
-                                val color = if (contract.type == ContractType.BUY_AT || contract.type == ContractType.CALL_OPTION) Color(0xFF00C853) else Color(0xFFD50000)
-                                Text("$label ${contract.quantity} ${if(contract.type == ContractType.CALL_OPTION || contract.type == ContractType.PUT_OPTION) "contracts" else "shares"}", color = color, fontWeight = FontWeight.Bold)
-                                Text("Target: $${String.format(Locale.US, "%.2f", contract.targetPrice)}", color = Color.White, fontSize = 12.sp)
-                            }
-                            IconButton(onClick = { 
-                                if (contract.type == ContractType.CALL_OPTION || contract.type == ContractType.PUT_OPTION) {
-                                    coroutineScope.launch {
-                                        val res = viewModel.settleOption(contract, stock.price)
-                                        if (res.isSuccess) {
-                                            val strike = contract.targetPrice
-                                            val current = stock.price
-                                            val isCall = contract.type == ContractType.CALL_OPTION
-                                            val intrinsicValue = if (isCall) {
-                                                (current - strike).coerceAtLeast(0.0)
-                                            } else {
-                                                (strike - current).coerceAtLeast(0.0)
-                                            }
-                                            val totalSettlement = intrinsicValue * 100 * contract.quantity
-                                            
-                                            if (totalSettlement > 0) {
-                                                Toast.makeText(context, "Option closed! Profit of $${String.format(Locale.US, "%.2f", totalSettlement)} added to balance.", Toast.LENGTH_LONG).show()
-                                            } else {
-                                                Toast.makeText(context, "Option closed at $0.00 value.", Toast.LENGTH_SHORT).show()
-                                            }
-                                        } else {
-                                            Toast.makeText(context, "Failed to close option: ${res.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
-                                        }
-                                    }
-                                } else {
-                                    onCancelContract(contract.id)
-                                }
-                            }) {
-                                val icon = if (contract.type == ContractType.CALL_OPTION || contract.type == ContractType.PUT_OPTION) Icons.Default.CheckCircle else Icons.Default.Close
-                                Icon(icon, contentDescription = "Close", tint = if (icon == Icons.Default.CheckCircle) Color.Green.copy(alpha = 0.7f) else Color.Gray)
-                            }
-                        }
-                        
-                        // Show P/L for options
-                        if (contract.type == ContractType.CALL_OPTION || contract.type == ContractType.PUT_OPTION) {
-                            val strike = contract.targetPrice
-                            val current = stock.price
-                            val isCall = contract.type == ContractType.CALL_OPTION
-                            val intrinsicValue = if (isCall) {
-                                (current - strike).coerceAtLeast(0.0)
-                            } else {
-                                (strike - current).coerceAtLeast(0.0)
-                            }
-                            val currentTotalValue = intrinsicValue * 100 * contract.quantity
-                            val costBasis = (contract.premium ?: 0.0) * 100 * contract.quantity
-                            val profit = currentTotalValue - costBasis
-                            
+                        Column {
                             Row(
-                                modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp).fillMaxWidth(),
+                                modifier = Modifier.padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Current Value: $${String.format(Locale.US, "%.2f", currentTotalValue)}", color = Color.Gray, fontSize = 11.sp)
-                                Text(
-                                    text = "P/L: ${if (profit >= 0) "+" else ""}$${String.format(Locale.US, "%.2f", profit)}",
-                                    color = if (profit >= 0) Color.Green else Color.Red,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
+                                Column(modifier = Modifier.weight(1f)) {
+                                    val label = when(contract.type) {
+                                        ContractType.BUY_AT -> "Buy"
+                                        ContractType.SELL_AT -> "Sell"
+                                        ContractType.CALL_OPTION -> "Call"
+                                        ContractType.PUT_OPTION -> "Put"
+                                    }
+                                    val color = if (contract.type == ContractType.BUY_AT || contract.type == ContractType.CALL_OPTION) 
+                                        Color(0xFF4CAF50) else Color(0xFFF44336)
+                                    
+                                    Text(
+                                        text = "$label ${contract.quantity} ${if(contract.type == ContractType.CALL_OPTION || contract.type == ContractType.PUT_OPTION) "contracts" else "shares"}", 
+                                        color = color, 
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "Target: $${String.format(Locale.US, "%.2f", contract.targetPrice)}", 
+                                        color = Color.White.copy(alpha = 0.7f), 
+                                        fontSize = 12.sp
+                                    )
+                                }
+                                IconButton(onClick = { 
+                                    if (contract.type == ContractType.CALL_OPTION || contract.type == ContractType.PUT_OPTION) {
+                                        coroutineScope.launch {
+                                            val res = viewModel.settleOption(contract, stock.price)
+                                            if (res.isSuccess) {
+                                                val strike = contract.targetPrice
+                                                val current = stock.price
+                                                val isCall = contract.type == ContractType.CALL_OPTION
+                                                val intrinsicValue = if (isCall) {
+                                                    (current - strike).coerceAtLeast(0.0)
+                                                } else {
+                                                    (strike - current).coerceAtLeast(0.0)
+                                                }
+                                                val totalSettlement = intrinsicValue * 100 * contract.quantity
+                                                
+                                                if (totalSettlement > 0) {
+                                                    Toast.makeText(context, "Option closed! Profit of $${String.format(Locale.US, "%.2f", totalSettlement)} added to balance.", Toast.LENGTH_LONG).show()
+                                                } else {
+                                                    Toast.makeText(context, "Option closed at $0.00 value.", Toast.LENGTH_SHORT).show()
+                                                }
+                                            } else {
+                                                Toast.makeText(context, "Failed to close option: ${res.exceptionOrNull()?.message}", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    } else {
+                                        onCancelContract(contract.id)
+                                    }
+                                }) {
+                                    val icon = if (contract.type == ContractType.CALL_OPTION || contract.type == ContractType.PUT_OPTION) Icons.Default.CheckCircle else Icons.Default.Close
+                                    Icon(icon, contentDescription = "Close", tint = if (icon == Icons.Default.CheckCircle) Color(0xFF4CAF50).copy(alpha = 0.8f) else Color.Gray)
+                                }
+                            }
+                            
+                            // Show P/L for options
+                            if (contract.type == ContractType.CALL_OPTION || contract.type == ContractType.PUT_OPTION) {
+                                val strike = contract.targetPrice
+                                val current = stock.price
+                                val isCall = contract.type == ContractType.CALL_OPTION
+                                val intrinsicValue = if (isCall) {
+                                    (current - strike).coerceAtLeast(0.0)
+                                } else {
+                                    (strike - current).coerceAtLeast(0.0)
+                                }
+                                val currentTotalValue = intrinsicValue * 100 * contract.quantity
+                                val costBasis = (contract.premium ?: 0.0) * 100 * contract.quantity
+                                val profit = currentTotalValue - costBasis
+                                
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 12.dp),
+                                    color = Color.White.copy(alpha = 0.1f)
                                 )
+                                
+                                Row(
+                                    modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text("Current Value: $${String.format(Locale.US, "%.2f", currentTotalValue)}", color = Color.Gray, fontSize = 11.sp)
+                                    Text(
+                                        text = "P/L: ${if (profit >= 0) "+" else ""}$${String.format(Locale.US, "%.2f", profit)}",
+                                        color = if (profit >= 0) Color(0xFF4CAF50) else Color(0xFFF44336),
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
                     }
@@ -1243,14 +1292,36 @@ fun SimulatedOptionsView(stock: Stock, viewModel: StockDetailViewModel) {
                 selected = selectedCall,
                 onClick = { selectedCall = true },
                 label = { Text("Call Option") },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = Color(0xFF4CAF50).copy(alpha = 0.2f),
+                    selectedLabelColor = Color(0xFF4CAF50),
+                    labelColor = Color.Gray
+                ),
+                border = FilterChipDefaults.filterChipBorder(
+                    enabled = true,
+                    selected = selectedCall,
+                    borderColor = Color.Gray.copy(alpha = 0.3f),
+                    selectedBorderColor = Color(0xFF4CAF50)
+                )
             )
             Spacer(modifier = Modifier.width(8.dp))
             FilterChip(
                 selected = !selectedCall,
                 onClick = { selectedCall = false },
                 label = { Text("Put Option") },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = Color(0xFFF44336).copy(alpha = 0.2f),
+                    selectedLabelColor = Color(0xFFF44336),
+                    labelColor = Color.Gray
+                ),
+                border = FilterChipDefaults.filterChipBorder(
+                    enabled = true,
+                    selected = !selectedCall,
+                    borderColor = Color.Gray.copy(alpha = 0.3f),
+                    selectedBorderColor = Color(0xFFF44336)
+                )
             )
         }
         
@@ -1263,7 +1334,15 @@ fun SimulatedOptionsView(stock: Stock, viewModel: StockDetailViewModel) {
             prefix = { Text("$") },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            colors = OutlinedTextFieldDefaults.colors(focusedTextColor = Color.White, unfocusedTextColor = Color.White)
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                unfocusedLabelColor = Color.Gray
+            ),
+            shape = RoundedCornerShape(12.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -1336,13 +1415,14 @@ fun SimulatedOptionsView(stock: Stock, viewModel: StockDetailViewModel) {
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = Color.Black
-            )
+            ),
+            shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Buy $contractsQuantity Contract${if (contractsQuantity > 1) "s" else ""}")
+            Text("Buy $contractsQuantity Contract${if (contractsQuantity > 1) "s" else ""}", fontWeight = FontWeight.Bold)
         }
         
         Spacer(modifier = Modifier.height(8.dp))
