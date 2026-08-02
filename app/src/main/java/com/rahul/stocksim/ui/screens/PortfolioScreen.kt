@@ -8,7 +8,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
@@ -127,7 +129,7 @@ fun PortfolioScreen(
                                         0 -> 290.dp // Overview with chart
                                         1 -> (40 + (industryData.size * 35)).dp.coerceIn(160.dp, 450.dp) // Dynamic height for industries
                                         2 -> 250.dp // Insights
-                                        3 -> if (state.aiAnalysis != null) 500.dp else 250.dp // AI Analysis (Taller for bigger text)
+                                        3 -> 450.dp // AI Analysis (Fixed height with scrolling)
                                         else -> 250.dp
                                     },
                                     label = "CardHeightAnimation"
@@ -139,7 +141,8 @@ fun PortfolioScreen(
                                     Column(
                                         modifier = Modifier
                                             .padding(top = 24.dp, start = 24.dp, end = 24.dp, bottom = 0.dp)
-                                            .height(cardHeight),
+                                            .height(cardHeight)
+                                            .then(if (page == 3) Modifier.verticalScroll(rememberScrollState()) else Modifier),
                                         verticalArrangement = if (isTopAligned) Arrangement.Top else Arrangement.Center
                                     ) {
                                         when (page) {
@@ -294,7 +297,7 @@ fun PortfolioScreen(
                                                     Spacer(modifier = Modifier.height(14.dp))
                                                     Text("Strategic Recommendations:", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                                                     Spacer(modifier = Modifier.height(8.dp))
-                                                    Column(modifier = Modifier.fillMaxHeight()) {
+                                                    Column {
                                                         analysis.recommendations.forEach { rec ->
                                                             Row(verticalAlignment = Alignment.Top, modifier = Modifier.padding(bottom = 6.dp)) {
                                                                 Text("•", color = Color.White, fontSize = 14.sp, modifier = Modifier.padding(end = 4.dp))
@@ -302,6 +305,7 @@ fun PortfolioScreen(
                                                             }
                                                         }
                                                     }
+                                                    Spacer(modifier = Modifier.height(24.dp)) // Padding at bottom for scroll
                                                 } else {
                                                     Column(
                                                         modifier = Modifier.fillMaxSize(),

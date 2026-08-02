@@ -122,6 +122,8 @@ class MainActivity : ComponentActivity() {
                         auth.signOut()
                         startDest.value = Screen.Login.createRoute("Account was not fully set up. Please sign in again.")
                     } else {
+                        // Ensure isPro tag exists
+                        authRepository.isProUser()
                         startDest.value = Screen.Main.route
                     }
                 } else {
@@ -214,17 +216,23 @@ class MainActivity : ComponentActivity() {
                                     type = NavType.StringType
                                     nullable = true
                                     defaultValue = null
+                                },
+                                navArgument("wantsPro") {
+                                    type = NavType.BoolType
+                                    defaultValue = false
                                 }
                             )
                         ) { backStackEntry ->
                             val isChange = backStackEntry.arguments?.getBoolean("isChangePassword") ?: false
                             val name = backStackEntry.arguments?.getString("name")
                             val email = backStackEntry.arguments?.getString("email")
+                            val wantsPro = backStackEntry.arguments?.getBoolean("wantsPro") ?: false
                             PasswordSetupScreen(
                                 navController = navController, 
                                 isChangePassword = isChange,
                                 initialName = name,
-                                initialEmail = email
+                                initialEmail = email,
+                                wantsPro = wantsPro
                             )
                         }
                         composable(
@@ -244,17 +252,23 @@ class MainActivity : ComponentActivity() {
                                     type = NavType.StringType
                                     nullable = true
                                     defaultValue = null
+                                },
+                                navArgument("wantsPro") {
+                                    type = NavType.BoolType
+                                    defaultValue = false
                                 }
                             )
                         ) { backStackEntry ->
                             val name = backStackEntry.arguments?.getString("name")
                             val email = backStackEntry.arguments?.getString("email")
                             val password = backStackEntry.arguments?.getString("password")
+                            val wantsPro = backStackEntry.arguments?.getBoolean("wantsPro") ?: false
                             BalanceSelectionScreen(
                                 navController = navController,
                                 name = name,
                                 email = email,
-                                password = password
+                                password = password,
+                                wantsPro = wantsPro
                             )
                         }
                         composable(Screen.Main.route) {
@@ -267,6 +281,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(Screen.Settings.route) {
                             SettingsScreen(navController = navController)
+                        }
+                        composable(Screen.Upgrade.route) {
+                            UpgradeScreen(navController = navController)
                         }
                         composable(Screen.EditProfile.route) {
                             EditProfileScreen(navController = navController)

@@ -26,10 +26,12 @@ class LeaderboardViewModel @Inject constructor() : ViewModel() {
     private val _leadersCache = MutableStateFlow<Map<Int, List<LeaderboardUser>>>(emptyMap())
     private val _loadingStates = MutableStateFlow<Map<Int, Boolean>>(emptyMap())
     private val _errorMessages = MutableStateFlow<Map<Int, String?>>(emptyMap())
+    private val _currentUserRankInfo = MutableStateFlow<Map<Int, Pair<Int?, Double>?>>(emptyMap())
 
     val leadersCache: StateFlow<Map<Int, List<LeaderboardUser>>> = _leadersCache.asStateFlow()
     val loadingStates: StateFlow<Map<Int, Boolean>> = _loadingStates.asStateFlow()
     val errorMessages: StateFlow<Map<Int, String?>> = _errorMessages.asStateFlow()
+    val currentUserRankInfo: StateFlow<Map<Int, Pair<Int?, Double>?>> = _currentUserRankInfo.asStateFlow()
 
     val currentUserId: String? get() = auth.currentUser?.uid
 
@@ -43,7 +45,10 @@ class LeaderboardViewModel @Inject constructor() : ViewModel() {
             updateError(level, null)
             updateLoading(level, true)
             try {
-                // Determine the query
+                // 1. Fetch current user info and calculate rank
+                fetchCurrentUserRank(level)
+
+                // 2. Fetch leaderboard users
                 val baseQuery = if (level == 0) {
                     firestore.collection("users")
                         .orderBy("totalAccountValue", Query.Direction.DESCENDING)
@@ -53,9 +58,9 @@ class LeaderboardViewModel @Inject constructor() : ViewModel() {
                         .orderBy("totalAccountValue", Query.Direction.DESCENDING)
                 }
 
-                // Increase limit to show more users
+                // Limit to 99 as requested
                 val snapshot = try {
-                    baseQuery.limit(100).get().await()
+                    baseQuery.limit(99).get().await()
                 } catch (e: Exception) {
                     if (e.message?.contains("PERMISSION_DENIED") == true) {
                         updateError(level, "Access denied. Please check your internet or account.")
@@ -103,9 +108,9 @@ class LeaderboardViewModel @Inject constructor() : ViewModel() {
                     }
                     
                     val filteredUsers = if (level == 0) {
-                        allUsers
+                        allUsers.take(99)
                     } else {
-                        allUsers.filter { it.level == level }
+                        allUsers.filter { it.level == level }.take(99)
                     }
                     updateCache(level, filteredUsers)
                 } catch (fallbackEx: Exception) {
@@ -119,6 +124,33 @@ class LeaderboardViewModel @Inject constructor() : ViewModel() {
             } finally {
                 updateLoading(level, false)
             }
+        }
+    }
+
+    private suspend fun fetchCurrentUserRank(level: Int) {
+        val uid = currentUserId ?: return
+        try {
+            val userDoc = firestore.collection("users").document(uid).get().await()
+            val userValue = (userDoc.get("totalAccountValue") as? Number)?.toDouble() 
+                ?: (userDoc.get("balance") as? Number)?.toDouble() ?: 0.0
+            
+            val rankQuery = if (level == 0) {
+                firestore.collection("users")
+                    .whereGreaterThan("totalAccountValue", userValue)
+            } else {
+                firestore.collection("users")
+                    .whereEqualTo("level", level)
+                    .whereGreaterThan("totalAccountValue", userValue)
+            }
+            
+            val countSnapshot = rankQuery.count().get(com.google.firebase.firestore.AggregateSource.SERVER).await()
+            val rank = (countSnapshot.count + 1).toInt()
+            
+            _currentUserRankInfo.value = _currentUserRankInfo.value.toMutableMap().apply {
+                put(level, rank to userValue)
+            }
+        } catch (e: Exception) {
+            Log.e("LeaderboardVM", "Failed to fetch current user rank", e)
         }
     }
 

@@ -33,20 +33,27 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.rahul.stocksim.BuildConfig
 import com.rahul.stocksim.data.AuthRepository
+import com.rahul.stocksim.ui.viewmodels.SettingsViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(navController: NavController) {
+fun SettingsScreen(
+    navController: NavController,
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val authRepository = AuthRepository()
+    val authRepository = AuthRepository() // Still used for some direct calls if needed, but better to move to VM
+    
+    val isPro by viewModel.isPro.collectAsState()
     
     // Using mutableStateOf for user to allow manual force-refresh
-    var user by remember { mutableStateOf(authRepository.currentUser) }
+    var user by remember { mutableStateOf(viewModel.currentUser) }
     var isRefreshing by remember { mutableStateOf(false) }
     
     var profilePhotoUrl by remember { mutableStateOf(user?.photoUrl) }
@@ -127,6 +134,25 @@ fun SettingsScreen(navController: NavController) {
                 )
 
                 Spacer(modifier = Modifier.height(32.dp))
+
+                // Pro Section
+                SettingsSection(title = "Tradr Pro") {
+                    SettingsItem(
+                        icon = Icons.Default.Star,
+                        label = "Membership",
+                        value = if (isPro) "Tradr Pro active" else "Upgrade to Pro",
+                        onClick = { navController.navigate(Screen.Upgrade.route) },
+                        trailing = {
+                            if (isPro) {
+                                Icon(Icons.Default.Verified, contentDescription = "Pro", tint = Color(0xFFFFD700))
+                            } else {
+                                Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = Color.Gray)
+                            }
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // User Profile Section
                 SettingsSection(title = "Profile") {

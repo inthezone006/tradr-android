@@ -20,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class StockDetailViewModel @Inject constructor(
     private val marketRepository: MarketRepository,
+    private val billingRepository: BillingRepository,
     private val geminiService: GeminiService,
     private val webSocket: TwelveDataWebSocket,
     savedStateHandle: SavedStateHandle
@@ -56,6 +57,17 @@ class StockDetailViewModel @Inject constructor(
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+    
+    val isPro = billingRepository.isPro
+
+    private val _technicalIndicators = MutableStateFlow<TechnicalIndicators?>(null)
+    val technicalIndicators: StateFlow<TechnicalIndicators?> = _technicalIndicators.asStateFlow()
+
+    data class TechnicalIndicators(
+        val rsi: Double?,
+        val macd: TwelveDataMACDValue?,
+        val bbands: TwelveDataBBandsValue?
+    )
 
     val userBalance: Flow<Double> = marketRepository.getUserBalance()
 

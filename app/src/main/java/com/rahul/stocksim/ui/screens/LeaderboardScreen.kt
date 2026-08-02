@@ -64,6 +64,7 @@ fun LeaderboardScreen(
     val leadersCache by viewModel.leadersCache.collectAsState()
     val loadingStates by viewModel.loadingStates.collectAsState()
     val errorMessages by viewModel.errorMessages.collectAsState()
+    val currentUserRankInfo by viewModel.currentUserRankInfo.collectAsState()
     
     val currentUserId = viewModel.currentUserId
     val selectedLevelFilter = levels[pagerState.currentPage]
@@ -131,6 +132,7 @@ fun LeaderboardScreen(
             val leaders = leadersCache[level] ?: emptyList()
             val isLoading = loadingStates[level] ?: false
             val errorMessage = errorMessages[level]
+            val myRankInfo = currentUserRankInfo[level]
 
             LazyColumn(
                 modifier = Modifier
@@ -140,13 +142,8 @@ fun LeaderboardScreen(
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    val currentUserLeader = leaders.find { it.id == currentUserId }
-                    val currentUserRank = if (currentUserLeader != null) {
-                         leaders.indexOfFirst { it.id == currentUserId }.let { if (it != -1) it + 1 else null }
-                    } else null
-                    
-                    if (currentUserLeader != null) {
-                        CurrentUserSummary(rank = currentUserRank, userValue = currentUserLeader.totalAccountValue)
+                    if (myRankInfo != null) {
+                        CurrentUserSummary(rank = myRankInfo.first, userValue = myRankInfo.second)
                         Spacer(modifier = Modifier.height(24.dp))
                     }
                 }

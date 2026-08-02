@@ -2,6 +2,8 @@ package com.rahul.stocksim.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rahul.stocksim.data.BillingRepository
+import com.rahul.stocksim.data.GeminiService
 import com.rahul.stocksim.data.MarketInsights
 import com.rahul.stocksim.data.MarketRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,7 +15,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class InsightsViewModel @Inject constructor(
-    private val marketRepository: MarketRepository
+    private val marketRepository: MarketRepository,
+    private val billingRepository: BillingRepository,
+    private val geminiService: GeminiService
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<InsightsUiState>(InsightsUiState.Loading)
@@ -21,6 +25,11 @@ class InsightsViewModel @Inject constructor(
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+    
+    val isPro = billingRepository.isPro
+
+    private val _recommendations = MutableStateFlow<String?>(null)
+    val recommendations: StateFlow<String?> = _recommendations.asStateFlow()
 
     init {
         loadInsights()
@@ -39,9 +48,24 @@ class InsightsViewModel @Inject constructor(
             try {
                 val insights = marketRepository.getMarketInsights()
                 _uiState.value = InsightsUiState.Success(insights)
+                
+                if (billingRepository.isPro.value) {
+                    loadRecommendations(insights)
+                }
             } catch (e: Exception) {
                 _uiState.value = InsightsUiState.Error(e.message ?: "Unknown error")
             }
+        }
+    }
+
+    private fun loadRecommendations(insights: MarketInsights) {
+        viewModelScope.launch {
+            val recs = geminiService.generateMarketRecommendations(
+                gainers = insights.gainers,
+                losers = insights.losers,
+                indices = insights.indices
+            )
+            _recommendations.value = recs
         }
     }
 }

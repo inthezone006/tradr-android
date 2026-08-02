@@ -29,7 +29,8 @@ fun PasswordSetupScreen(
     navController: NavController, 
     isChangePassword: Boolean = false,
     initialName: String? = null,
-    initialEmail: String? = null
+    initialEmail: String? = null,
+    wantsPro: Boolean = false
 ) {
     val authRepository = AuthRepository()
     val coroutineScope = rememberCoroutineScope()
@@ -164,13 +165,13 @@ fun PasswordSetupScreen(
                                         val result = authRepository.updatePassword(password)
                                         isLoading = false
                                         if (result.isSuccess) {
-                                            navController.navigate(Screen.BalanceSelection.createRoute(initialName ?: currentUser.displayName, initialEmail ?: currentUser.email, null))
+                                            navController.navigate(Screen.BalanceSelection.createRoute(initialName ?: currentUser.displayName, initialEmail ?: currentUser.email, null, wantsPro))
                                         } else {
                                             snackbarHostState.showSnackbar("Error linking password: ${result.exceptionOrNull()?.localizedMessage}")
                                         }
                                     }
                                 } else {
-                                    navController.navigate(Screen.BalanceSelection.createRoute(initialName, initialEmail, password))
+                                    navController.navigate(Screen.BalanceSelection.createRoute(initialName, initialEmail, password, wantsPro))
                                 }
                             }
                         }

@@ -41,18 +41,25 @@ import java.util.Locale
 @Composable
 fun InsightsScreen(
     onStockClick: (Stock) -> Unit,
+    onUpgradeClick: () -> Unit,
     viewModel: InsightsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isPro by viewModel.isPro.collectAsState()
+    val recommendations by viewModel.recommendations.collectAsState()
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
 
-    val tabs = listOf(
-        Triple("Top Gainers", Icons.AutoMirrored.Filled.TrendingUp, 0),
-        Triple("Top Losers", Icons.AutoMirrored.Filled.TrendingDown, 1),
-        Triple("Sectors", Icons.Default.PieChart, 2),
-        Triple("Indices", Icons.Default.Public, 3)
-    )
+    val tabs = remember(isPro) {
+        mutableListOf(
+            Triple("Top Gainers", Icons.AutoMirrored.Filled.TrendingUp, 0),
+            Triple("Top Losers", Icons.AutoMirrored.Filled.TrendingDown, 1),
+            Triple("Sectors", Icons.Default.PieChart, 2),
+            Triple("Indices", Icons.Default.Public, 3)
+        ).apply {
+            add(Triple("Pro Picks", Icons.Default.Star, 4))
+        }
+    }
 
     val pagerState = rememberPagerState(pageCount = { tabs.size })
 
@@ -148,6 +155,15 @@ fun InsightsScreen(
                                         IndexCard(stockIndex, modifier = Modifier.fillMaxWidth()) { onStockClick(stockIndex) }
                                     }
                                 }
+                                4 -> { // Pro Picks
+                                    item {
+                                        if (isPro) {
+                                            ProRecommendationsContent(recommendations)
+                                        } else {
+                                            ProLockedContent(onUpgradeClick)
+                                        }
+                                    }
+                                }
                             }
                             item { Spacer(modifier = Modifier.height(32.dp)) }
                         }
@@ -159,6 +175,93 @@ fun InsightsScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ProRecommendationsContent(recommendations: String?) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+            .padding(20.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFFFFD700))
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = "AI Market Analysis",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        if (recommendations == null) {
+            Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Color.White)
+            }
+        } else {
+            Text(
+                text = recommendations,
+                color = Color.White.copy(alpha = 0.9f),
+                lineHeight = 24.sp,
+                fontSize = 15.sp
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "Recommendations are for informational purposes only. Invest at your own risk.",
+            fontSize = 11.sp,
+            color = Color.Gray,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+fun ProLockedContent(onUpgradeClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            imageVector = Icons.Default.Lock,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = Color.Gray
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "Pro Picks is Locked",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "Upgrade to Tradr Pro to get AI-powered investment recommendations and deep market analysis.",
+            textAlign = TextAlign.Center,
+            color = Color.Gray,
+            fontSize = 14.sp
+        )
+        Spacer(modifier = Modifier.height(32.dp))
+        Button(
+            onClick = onUpgradeClick,
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        ) {
+            Text("Upgrade for $1.00", fontWeight = FontWeight.Bold)
         }
     }
 }

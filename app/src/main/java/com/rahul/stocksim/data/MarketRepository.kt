@@ -21,6 +21,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.first
 import com.google.firebase.Timestamp
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -255,6 +256,7 @@ class MarketRepository @Inject constructor(
     private val api: FinnhubApi,
     private val twelveDataApi: TwelveDataApi,
     private val stockDao: StockDao,
+    private val billingRepository: BillingRepository,
     @ApplicationContext private val context: Context
 ) {
     private val firestore = FirebaseFirestore.getInstance()
@@ -844,6 +846,14 @@ class MarketRepository @Inject constructor(
 
     suspend fun addToWatchlist(symbol: String): Result<Unit> {
         val userId = auth.currentUser?.uid ?: return Result.failure(Exception("Not logged in"))
+        
+        if (!billingRepository.isPro.value) {
+            val currentWatchlist = getWatchlist()
+            if (currentWatchlist.size >= 10) {
+                return Result.failure(Exception("Watchlist limit reached for Free users. Upgrade to Pro for unlimited watchlist!"))
+            }
+        }
+
         return try {
             firestore.collection("users").document(userId).collection("watchlist").document(symbol).set(mapOf("symbol" to symbol)).await()
             analytics.logEvent(FirebaseAnalytics.Event.ADD_TO_WISHLIST, Bundle().apply { putString(FirebaseAnalytics.Param.ITEM_ID, symbol) })

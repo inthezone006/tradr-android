@@ -416,14 +416,6 @@ fun ContractActionSheet(
                 )
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            TextButton(
-                onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Keep Contract", color = Color.Gray, fontWeight = FontWeight.Medium)
-            }
         }
     }
 }

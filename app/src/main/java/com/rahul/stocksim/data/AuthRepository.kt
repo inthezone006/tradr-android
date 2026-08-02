@@ -283,7 +283,8 @@ class AuthRepository {
                 "level" to level,
                 "email" to user.email,
                 "displayName" to user.displayName,
-                "photoUrl" to user.photoUrl?.toString()
+                "photoUrl" to user.photoUrl?.toString(),
+                "isPro" to false // Initialize Pro status
             )
             userRef.set(userData, SetOptions.merge()).await()
 
@@ -339,6 +340,25 @@ class AuthRepository {
         return try {
             val snapshot = firestore.collection("users").document(user.uid).get().await()
             snapshot.getBoolean("tutorialCompleted") ?: false
+        } catch (e: Exception) {
+            recordError(e)
+            false
+        }
+    }
+
+    suspend fun isProUser(): Boolean {
+        val user = auth.currentUser ?: return false
+        return try {
+            val snapshot = firestore.collection("users").document(user.uid).get().await()
+            val hasPro = snapshot.getBoolean("isPro")
+            if (hasPro == null) {
+                // Initialize if missing
+                firestore.collection("users").document(user.uid)
+                    .set(mapOf("isPro" to false), SetOptions.merge()).await()
+                false
+            } else {
+                hasPro
+            }
         } catch (e: Exception) {
             recordError(e)
             false

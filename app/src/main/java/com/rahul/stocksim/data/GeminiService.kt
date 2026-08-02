@@ -153,6 +153,45 @@ class GeminiService @Inject constructor() {
         }
         null
     }
+
+    suspend fun generateMarketRecommendations(
+        gainers: List<Stock>,
+        losers: List<Stock>,
+        indices: List<Stock>
+    ): String = withContext(Dispatchers.IO) {
+        if (apiKey.isEmpty()) return@withContext "AI Recommendations unavailable."
+
+        val prompt = """
+            Analyze the current market state and provide investment recommendations.
+            
+            Top Gainers:
+            ${gainers.take(5).joinToString("\n") { "- ${it.symbol}: ${it.percentChange}%" }}
+            
+            Top Losers:
+            ${losers.take(5).joinToString("\n") { "- ${it.symbol}: ${it.percentChange}%" }}
+            
+            Global Indices:
+            ${indices.take(5).joinToString("\n") { "- ${it.symbol}: ${it.percentChange}%" }}
+            
+            Based on this data, provide:
+            1. Short-term strategy (Buy/Sell/Hold types).
+            2. 3 specific stocks or sectors to watch and WHY.
+            3. Overall market sentiment analysis.
+            
+            Keep it professional, concise, and highlight key tickers in **bold**.
+        """.trimIndent()
+
+        for (model in models) {
+            try {
+                val response = model.generateContent(prompt)
+                val text = response.text
+                if (text != null) return@withContext text
+            } catch (e: Exception) {
+                continue
+            }
+        }
+        "Unable to generate recommendations at this time."
+    }
 }
 
 data class PortfolioAnalysis(

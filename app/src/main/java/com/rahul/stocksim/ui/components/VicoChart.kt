@@ -38,6 +38,9 @@ import kotlin.math.abs
 import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarkerValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.marker.LineCartesianLayerMarkerTarget
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberCandlestickCartesianLayer
+import com.patrykandpatrick.vico.core.cartesian.data.candlestickSeries
+import com.rahul.stocksim.data.TwelveDataTimeSeriesValue
 
 @Composable
 fun VicoLineChart(
@@ -156,6 +159,63 @@ fun VicoLineChart(
             }
         ),
         marker = marker
+    )
+
+    CartesianChartHost(
+        chart = chart,
+        modelProducer = modelProducer,
+        modifier = modifier.padding(top = 16.dp, bottom = 4.dp, start = 8.dp, end = 8.dp),
+        scrollState = rememberVicoScrollState(scrollEnabled = false)
+    )
+}
+
+@Composable
+fun VicoCandlestickChart(
+    history: List<TwelveDataTimeSeriesValue>,
+    modifier: Modifier = Modifier
+) {
+    val modelProducer = remember { CartesianChartModelProducer() }
+    
+    LaunchedEffect(history) {
+        if (history.isNotEmpty()) {
+            modelProducer.runTransaction {
+                candlestickSeries(
+                    opening = history.map { it.open.toDoubleOrNull() ?: 0.0 },
+                    closing = history.map { it.close.toDoubleOrNull() ?: 0.0 },
+                    low = history.map { it.low.toDoubleOrNull() ?: 0.0 },
+                    high = history.map { it.high.toDoubleOrNull() ?: 0.0 }
+                )
+            }
+        }
+    }
+
+    if (history.isEmpty()) return
+
+    val chart = rememberCartesianChart(
+        rememberCandlestickCartesianLayer(),
+        bottomAxis = HorizontalAxis.rememberBottom(
+            label = rememberTextComponent(
+                color = Color.Gray,
+                textSize = 10.sp,
+                padding = Dimensions(8f, 2f, 8f, 2f)
+            ),
+            line = null,
+            tick = null,
+            guideline = null
+        ),
+        endAxis = VerticalAxis.rememberEnd(
+            label = rememberTextComponent(
+                color = Color.Gray, 
+                textSize = 10.sp,
+                padding = Dimensions(8f, 2f, 8f, 2f)
+            ),
+            line = null,
+            tick = null,
+            guideline = rememberLineComponent(
+                fill = fill(Color.White.copy(alpha = 0.1f)),
+                thickness = 1.dp
+            )
+        )
     )
 
     CartesianChartHost(

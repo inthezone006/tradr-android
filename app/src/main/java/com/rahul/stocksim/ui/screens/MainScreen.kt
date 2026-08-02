@@ -337,7 +337,10 @@ fun MainScreen(
                     )
                 }
                 composable(BottomNavItem.Insights.route) {
-                    InsightsScreen(onStockClick = onStockClick)
+                    InsightsScreen(
+                        onStockClick = onStockClick,
+                        onUpgradeClick = { mainNavController.navigate(Screen.Upgrade.route) }
+                    )
                 }
                 composable(BottomNavItem.Contracts.route) {
                     ContractsScreen(mainNavController)
