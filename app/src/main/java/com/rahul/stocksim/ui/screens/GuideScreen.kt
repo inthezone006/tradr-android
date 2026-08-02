@@ -60,10 +60,9 @@ fun GuideScreen(navController: NavController) {
         item {
             Text(
                 text = "Guide",
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.displayLarge,
                 color = Color.White,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 16.dp)
             )
         }
 
