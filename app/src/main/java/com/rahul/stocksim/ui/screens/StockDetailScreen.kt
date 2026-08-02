@@ -916,92 +916,98 @@ fun PriceAlertSheet(
 ) {
     var alertTargetPrice by remember { mutableStateOf("") }
     var alertIsAbove by remember { mutableStateOf(true) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
+        sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
         scrimColor = Color.Black.copy(alpha = 0.7f),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(24.dp)
+                .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp)
         ) {
-            Text(
-                "Set Price Alert for $symbol",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = alertTargetPrice,
-                onValueChange = { if (it.isEmpty() || it.toDoubleOrNull() != null) alertTargetPrice = it },
-                label = { Text("Target Price") },
-                prefix = { Text("$") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
-                    focusedLabelColor = MaterialTheme.colorScheme.primary,
-                    unfocusedLabelColor = Color.Gray
-                ),
-                shape = RoundedCornerShape(12.dp)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Trigger when price is", modifier = Modifier.weight(1f))
-                FilterChip(
-                    selected = alertIsAbove,
-                    onClick = { alertIsAbove = true },
-                    label = { Text("Above") },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                        selectedLabelColor = MaterialTheme.colorScheme.primary
-                    )
+            item {
+                Text(
+                    "Set Price Alert for $symbol",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                FilterChip(
-                    selected = !alertIsAbove,
-                    onClick = { alertIsAbove = false },
-                    label = { Text("Below") },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                        selectedLabelColor = MaterialTheme.colorScheme.primary
-                    )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = alertTargetPrice,
+                    onValueChange = { if (it.isEmpty() || it.toDoubleOrNull() != null) alertTargetPrice = it },
+                    label = { Text("Target Price") },
+                    prefix = { Text("$") },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = Color.Gray
+                    ),
+                    shape = RoundedCornerShape(12.dp)
                 )
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = {
-                    val target = alertTargetPrice.toDoubleOrNull()
-                    if (target != null) {
-                        onAddAlert(target, alertIsAbove)
-                        alertTargetPrice = ""
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = alertTargetPrice.isNotEmpty()
-            ) {
-                Text("Set Alert")
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Trigger when price is", modifier = Modifier.weight(1f))
+                    FilterChip(
+                        selected = alertIsAbove,
+                        onClick = { alertIsAbove = true },
+                        label = { Text("Above") },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                            selectedLabelColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    FilterChip(
+                        selected = !alertIsAbove,
+                        onClick = { alertIsAbove = false },
+                        label = { Text("Below") },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                            selectedLabelColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(
+                    onClick = {
+                        val target = alertTargetPrice.toDoubleOrNull()
+                        if (target != null) {
+                            onAddAlert(target, alertIsAbove)
+                            alertTargetPrice = ""
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = alertTargetPrice.isNotEmpty()
+                ) {
+                    Text("Set Alert")
+                }
             }
 
             if (priceAlerts.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(24.dp))
-                Text("Active Alerts", fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(8.dp))
-                priceAlerts.forEach { alert ->
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text("Active Alerts", fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                
+                items(priceAlerts) { alert ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(vertical = 4.dp)
@@ -1036,139 +1042,145 @@ fun TradeContractSheet(
     var selectedTab by remember { mutableIntStateOf(0) }
     var contractPrice by remember { mutableStateOf(stock.price.toString()) }
     var contractQuantity by remember { mutableStateOf("1") }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     
     ModalBottomSheet(
         onDismissRequest = onDismiss,
+        sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
         scrimColor = Color.Black.copy(alpha = 0.7f),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(24.dp)
+                .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp)
         ) {
-            Text(
-                "Trading Desk",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TabRow(
-                selectedTabIndex = selectedTab,
-                containerColor = Color.Transparent,
-                contentColor = Color.White,
-                divider = {}
-            ) {
-                Tab(
-                    selected = selectedTab == 0,
-                    onClick = { selectedTab = 0 },
-                    text = { Text("Limit Orders") }
+            item {
+                Text(
+                    "Trading Desk",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
                 )
-                Tab(
-                    selected = selectedTab == 1,
-                    onClick = { selectedTab = 1 },
-                    text = { Text("Options") }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            if (selectedTab == 0) {
-                // --- LIMIT ORDERS TAB ---
-                Text("Set automated buy/sell targets for ${stock.symbol}", color = Color.Gray, fontSize = 14.sp)
                 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    OutlinedTextField(
-                        value = contractPrice,
-                        onValueChange = { contractPrice = it },
-                        label = { Text("Execution Price") },
-                        prefix = { Text("$") },
-                        modifier = Modifier.weight(1f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
-                            focusedLabelColor = MaterialTheme.colorScheme.primary,
-                            unfocusedLabelColor = Color.Gray
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    
-                    OutlinedTextField(
-                        value = contractQuantity,
-                        onValueChange = { if (it.isEmpty() || it.all { char -> char.isDigit() }) contractQuantity = it },
-                        label = { Text("Quantity") },
-                        modifier = Modifier.weight(0.6f),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
-                            focusedLabelColor = MaterialTheme.colorScheme.primary,
-                            unfocusedLabelColor = Color.Gray
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                }
-
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Button(
-                        onClick = {
-                            val target = contractPrice.toDoubleOrNull()
-                            val qty = contractQuantity.toLongOrNull() ?: 0L
-                            if (target != null && qty > 0) {
-                                onCreateContract(ContractType.BUY_AT, target, qty)
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF4CAF50),
-                            contentColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) { Text("Buy At Target") }
-                    
-                    Button(
-                        onClick = {
-                            val target = contractPrice.toDoubleOrNull()
-                            val qty = contractQuantity.toLongOrNull() ?: 0L
-                            if (target != null && qty > 0) {
-                                onCreateContract(ContractType.SELL_AT, target, qty)
-                            }
-                        },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFF44336),
-                            contentColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) { Text("Sell At Target") }
+                TabRow(
+                    selectedTabIndex = selectedTab,
+                    containerColor = Color.Transparent,
+                    contentColor = Color.White,
+                    divider = {}
+                ) {
+                    Tab(
+                        selected = selectedTab == 0,
+                        onClick = { selectedTab = 0 },
+                        text = { Text("Limit Orders") }
+                    )
+                    Tab(
+                        selected = selectedTab == 1,
+                        onClick = { selectedTab = 1 },
+                        text = { Text("Options") }
+                    )
                 }
-            } else {
-                // --- OPTIONS TAB ---
-                val detailViewModel: StockDetailViewModel = hiltViewModel()
-                SimulatedOptionsView(stock, detailViewModel)
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                if (selectedTab == 0) {
+                    // --- LIMIT ORDERS TAB ---
+                    Text("Set automated buy/sell targets for ${stock.symbol}", color = Color.Gray, fontSize = 14.sp)
+                    
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        OutlinedTextField(
+                            value = contractPrice,
+                            onValueChange = { contractPrice = it },
+                            label = { Text("Execution Price") },
+                            prefix = { Text("$") },
+                            modifier = Modifier.weight(1f),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
+                                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                                unfocusedLabelColor = Color.Gray
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        
+                        OutlinedTextField(
+                            value = contractQuantity,
+                            onValueChange = { if (it.isEmpty() || it.all { char -> char.isDigit() }) contractQuantity = it },
+                            label = { Text("Quantity") },
+                            modifier = Modifier.weight(0.6f),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = Color.Gray.copy(alpha = 0.5f),
+                                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                                unfocusedLabelColor = Color.Gray
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Button(
+                            onClick = {
+                                val target = contractPrice.toDoubleOrNull()
+                                val qty = contractQuantity.toLongOrNull() ?: 0L
+                                if (target != null && qty > 0) {
+                                    onCreateContract(ContractType.BUY_AT, target, qty)
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF4CAF50),
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) { Text("Buy At Target") }
+                        
+                        Button(
+                            onClick = {
+                                val target = contractPrice.toDoubleOrNull()
+                                val qty = contractQuantity.toLongOrNull() ?: 0L
+                                if (target != null && qty > 0) {
+                                    onCreateContract(ContractType.SELL_AT, target, qty)
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFF44336),
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        ) { Text("Sell At Target") }
+                    }
+                } else {
+                    // --- OPTIONS TAB ---
+                    val detailViewModel: StockDetailViewModel = hiltViewModel()
+                    SimulatedOptionsView(stock, detailViewModel)
+                }
             }
 
             // --- PENDING CONTRACTS (Always visible) ---
             if (activeContracts.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(32.dp))
-                Text("Pending Contracts", fontWeight = FontWeight.Bold, color = Color.Gray)
-                Spacer(modifier = Modifier.height(12.dp))
-                activeContracts.forEach { contract ->
+                item {
+                    Spacer(modifier = Modifier.height(32.dp))
+                    Text("Pending Contracts", fontWeight = FontWeight.Bold, color = Color.Gray)
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+                
+                items(activeContracts) { contract ->
                     Card(
                         modifier = Modifier.padding(vertical = 6.dp).fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.07f)),
