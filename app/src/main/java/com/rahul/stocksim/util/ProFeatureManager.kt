@@ -2,7 +2,6 @@ package com.rahul.stocksim.util
 
 import com.rahul.stocksim.data.AuthRepository
 import com.rahul.stocksim.data.BillingRepository
-import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -11,13 +10,8 @@ class ProFeatureManager @Inject constructor(
     private val authRepository: AuthRepository,
     private val billingRepository: BillingRepository
 ) {
-    val isPro = combine(billingRepository.isPro) { pro ->
-        pro[0] // Since we only have one flow for now
-    }
+    val isPro = billingRepository.isPro
     
-    // Better implementation using combine correctly
-    val proStatus = billingRepository.isPro
-
     fun canAccessTechnicalIndicators(): Boolean = billingRepository.isPro.value
     
     fun canAccessMultiplePortfolios(): Boolean = billingRepository.isPro.value

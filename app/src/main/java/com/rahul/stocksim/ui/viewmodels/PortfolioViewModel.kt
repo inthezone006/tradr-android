@@ -22,6 +22,11 @@ class PortfolioViewModel @Inject constructor(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
+    private val _portfolios = MutableStateFlow<List<Portfolio>>(listOf(Portfolio(id = "default", name = "Main Portfolio")))
+    val portfolios: StateFlow<List<Portfolio>> = _portfolios.asStateFlow()
+
+    val selectedPortfolioId: StateFlow<String> = marketRepository.currentPortfolioId
+
     val userBalance: Flow<Double> = marketRepository.getUserBalance()
 
     private val _contracts = MutableStateFlow<List<TradeContract>>(emptyList())
@@ -32,12 +37,36 @@ class PortfolioViewModel @Inject constructor(
 
     private val _portfolioHistory = MutableStateFlow<List<StockPricePoint>>(emptyList())
     val portfolioHistory: StateFlow<List<StockPricePoint>> = _portfolioHistory.asStateFlow()
+    
+    val isPro = marketRepository.isPro
 
     init {
         loadData(false)
+        loadPortfolios()
         loadContracts()
         loadExecutedContracts()
         loadHistory()
+    }
+
+    fun loadPortfolios() {
+        viewModelScope.launch {
+            _portfolios.value = marketRepository.getPortfolios()
+        }
+    }
+
+    fun selectPortfolio(portfolioId: String) {
+        marketRepository.selectPortfolio(portfolioId)
+        loadData(true)
+    }
+
+    fun createPortfolio(name: String) {
+        viewModelScope.launch {
+            val result = marketRepository.createPortfolio(name)
+            if (result.isSuccess) {
+                loadPortfolios()
+                selectPortfolio(result.getOrThrow().id)
+            }
+        }
     }
 
     fun loadContracts() {
@@ -110,7 +139,8 @@ class PortfolioViewModel @Inject constructor(
     private fun loadData(forceRefresh: Boolean) {
         viewModelScope.launch {
             try {
-                val portfolioItems = marketRepository.getPortfolioWithQuotes(forceRefresh)
+                val portfolioId = marketRepository.currentPortfolioId.value
+                val portfolioItems = marketRepository.getPortfolioWithQuotes(forceRefresh, portfolioId)
                 
                 // 1. Calculate current real-time values
                 val balance = marketRepository.getUserBalance().first()
@@ -119,8 +149,8 @@ class PortfolioViewModel @Inject constructor(
                 
                 _uiState.value = PortfolioUiState.Success(portfolioItems)
                 
-                // 2. Sync to Firestore if valid
-                if (totalAccountValue > 0) {
+                // 2. Sync to Firestore if valid and it's the main portfolio
+                if (totalAccountValue > 0 && portfolioId == "default") {
                     marketRepository.syncTotalAccountValue(totalAccountValue)
                     
                     // 3. Update the local graph state immediately so it ends at the current value

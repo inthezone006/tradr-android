@@ -60,6 +60,16 @@ class StockDetailViewModel @Inject constructor(
     
     val isPro = billingRepository.isPro
 
+    init {
+        symbol?.let { stockSymbol ->
+            viewModelScope.launch {
+                marketRepository.currentPortfolioId.collect { portfolioId ->
+                    _ownedQuantity.value = marketRepository.getPortfolio(portfolioId).find { it.first == stockSymbol }?.second ?: 0L
+                }
+            }
+        }
+    }
+
     private val _technicalIndicators = MutableStateFlow<TechnicalIndicators?>(null)
     val technicalIndicators: StateFlow<TechnicalIndicators?> = _technicalIndicators.asStateFlow()
 
@@ -317,18 +327,20 @@ class StockDetailViewModel @Inject constructor(
 
     suspend fun buyStock(quantity: Int, price: Double): Result<Double> {
         val stockSymbol = symbol ?: return Result.failure(Exception("No symbol"))
-        val result = marketRepository.buyStock(stockSymbol, quantity, price)
+        val portfolioId = marketRepository.currentPortfolioId.value
+        val result = marketRepository.buyStock(stockSymbol, quantity, price, portfolioId)
         if (result.isSuccess) {
-            _ownedQuantity.value = marketRepository.getPortfolio().find { it.first == stockSymbol }?.second ?: 0L
+            _ownedQuantity.value = marketRepository.getPortfolio(portfolioId).find { it.first == stockSymbol }?.second ?: 0L
         }
         return result
     }
 
     suspend fun sellStock(quantity: Int, price: Double): Result<Double> {
         val stockSymbol = symbol ?: return Result.failure(Exception("No symbol"))
-        val result = marketRepository.sellStock(stockSymbol, quantity, price)
+        val portfolioId = marketRepository.currentPortfolioId.value
+        val result = marketRepository.sellStock(stockSymbol, quantity, price, portfolioId)
         if (result.isSuccess) {
-            _ownedQuantity.value = marketRepository.getPortfolio().find { it.first == stockSymbol }?.second ?: 0L
+            _ownedQuantity.value = marketRepository.getPortfolio(portfolioId).find { it.first == stockSymbol }?.second ?: 0L
         }
         return result
     }

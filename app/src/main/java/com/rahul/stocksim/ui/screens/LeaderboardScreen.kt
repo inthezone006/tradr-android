@@ -10,6 +10,8 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -46,7 +48,8 @@ data class LeaderboardUser(
     val name: String,
     val totalAccountValue: Double,
     val photoUrl: String? = null,
-    val level: Int = 4
+    val level: Int = 4,
+    val isPro: Boolean = false
 )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -299,6 +302,15 @@ fun LeaderCard(rank: Int, user: LeaderboardUser, isCurrentUser: Boolean) {
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
+                    if (user.isPro) {
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Pro",
+                            tint = Color(0xFFFFD700),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                     if (isCurrentUser) {
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(text = "👑", fontSize = 14.sp)

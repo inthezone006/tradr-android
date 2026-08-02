@@ -150,6 +150,26 @@ fun SettingsScreen(
                             }
                         }
                     )
+                    if (isPro) {
+                        SettingsItem(
+                            icon = Icons.Default.Payments,
+                            label = "Subscription",
+                            value = "Manage subscription",
+                            onClick = {
+                                val packageName = context.packageName
+                                val intent = Intent(Intent.ACTION_VIEW).apply {
+                                    data = Uri.parse("https://play.google.com/store/account/subscriptions?package=$packageName&sku=tradr_pro")
+                                    setPackage("com.android.vending")
+                                }
+                                try {
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/account/subscriptions"))
+                                    context.startActivity(webIntent)
+                                }
+                            }
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

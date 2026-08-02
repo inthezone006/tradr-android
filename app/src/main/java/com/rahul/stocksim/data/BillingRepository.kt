@@ -64,7 +64,7 @@ class BillingRepository @Inject constructor(
 
     private fun queryPurchases() {
         val params = QueryPurchasesParams.newBuilder()
-            .setProductType(BillingClient.ProductType.INAPP)
+            .setProductType(BillingClient.ProductType.SUBS)
             .build()
 
         billingClient.queryPurchasesAsync(params) { billingResult, purchases ->
@@ -76,6 +76,15 @@ class BillingRepository @Inject constructor(
                 if (hasPro) {
                     syncProStatusWithFirebase()
                 }
+            } else if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                // Also check INAPP as fallback if you previously used it
+                val inAppParams = QueryPurchasesParams.newBuilder()
+                    .setProductType(BillingClient.ProductType.INAPP)
+                    .build()
+                billingClient.queryPurchasesAsync(inAppParams) { _, inAppPurchases ->
+                    val hasPro = inAppPurchases.any { it.products.contains("tradr_pro") }
+                    if (hasPro) _isPro.value = true
+                }
             }
         }
     }
@@ -85,7 +94,7 @@ class BillingRepository @Inject constructor(
         val productList = listOf(
             QueryProductDetailsParams.Product.newBuilder()
                 .setProductId("tradr_pro")
-                .setProductType(BillingClient.ProductType.INAPP)
+                .setProductType(BillingClient.ProductType.SUBS)
                 .build()
         )
 

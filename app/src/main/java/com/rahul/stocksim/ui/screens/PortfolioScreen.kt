@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.TrendingDown
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.runtime.*
@@ -24,10 +25,14 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,12 +41,17 @@ import androidx.navigation.NavController
 import com.rahul.stocksim.data.MarketRepository
 import com.rahul.stocksim.data.StockPricePoint
 import com.rahul.stocksim.model.Stock
+import com.rahul.stocksim.model.Portfolio
+import com.rahul.stocksim.model.TradeContract
 import com.rahul.stocksim.ui.components.StockRow
 import com.rahul.stocksim.ui.components.VicoLineChart
 import com.rahul.stocksim.ui.components.VicoPieChart
 import com.rahul.stocksim.ui.viewmodels.PortfolioUiState
 import com.rahul.stocksim.ui.viewmodels.PortfolioViewModel
 import com.google.accompanist.pager.HorizontalPagerIndicator
+import kotlinx.coroutines.launch
+import java.util.Locale
+import java.util.UUID
 import kotlinx.coroutines.flow.first
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -54,8 +64,47 @@ fun PortfolioScreen(
     val balance by viewModel.userBalance.collectAsState(initial = 0.0)
     val uiState by viewModel.uiState.collectAsState()
     val portfolioHistory by viewModel.portfolioHistory.collectAsState()
+    val portfolios by viewModel.portfolios.collectAsState()
+    val selectedPortfolioId by viewModel.selectedPortfolioId.collectAsState()
+    val isPro by viewModel.isPro.collectAsState()
     
     var showAiSheet by remember { mutableStateOf(false) }
+    var showCreatePortfolioDialog by remember { mutableStateOf(false) }
+    var newPortfolioName by remember { mutableStateOf("") }
+
+    if (showCreatePortfolioDialog) {
+        AlertDialog(
+            onDismissRequest = { showCreatePortfolioDialog = false },
+            title = { Text("Create Portfolio") },
+            text = {
+                TextField(
+                    value = newPortfolioName,
+                    onValueChange = { newPortfolioName = it },
+                    placeholder = { Text("Portfolio Name") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (newPortfolioName.isNotBlank()) {
+                            viewModel.createPortfolio(newPortfolioName)
+                            newPortfolioName = ""
+                            showCreatePortfolioDialog = false
+                        }
+                    }
+                ) {
+                    Text("CREATE")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCreatePortfolioDialog = false }) {
+                    Text("CANCEL")
+                }
+            }
+        )
+    }
 
     Box(
         modifier = Modifier
@@ -95,12 +144,52 @@ fun PortfolioScreen(
                 ) {
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Portfolio",
-                            color = Color.White,
-                            style = MaterialTheme.typography.displayLarge,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        ) {
+                            Text(
+                                text = "Portfolio",
+                                color = Color.White,
+                                style = MaterialTheme.typography.displayLarge,
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (isPro) {
+                                IconButton(onClick = { showCreatePortfolioDialog = true }) {
+                                    Icon(Icons.Default.Add, contentDescription = "Add Portfolio", tint = Color.White)
+                                }
+                            }
+                        }
+                        
+                        if (portfolios.size > 1) {
+                            ScrollableTabRow(
+                                selectedTabIndex = portfolios.indexOfFirst { it.id == selectedPortfolioId },
+                                containerColor = Color.Transparent,
+                                contentColor = Color.White,
+                                edgePadding = 0.dp,
+                                divider = {},
+                                indicator = { tabPositions ->
+                                    val index = portfolios.indexOfFirst { it.id == selectedPortfolioId }.coerceAtLeast(0)
+                                    TabRowDefaults.SecondaryIndicator(
+                                        modifier = Modifier.tabIndicatorOffset(tabPositions[index]),
+                                        color = Color.White
+                                    )
+                                }
+                            ) {
+                                portfolios.forEach { portfolio ->
+                                    Tab(
+                                        selected = selectedPortfolioId == portfolio.id,
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            viewModel.selectPortfolio(portfolio.id)
+                                        },
+                                        text = { Text(portfolio.name) }
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                        
                         // Enhanced Fintech Header with Deep Insights
                         Surface(
                             modifier = Modifier
@@ -113,7 +202,7 @@ fun PortfolioScreen(
 
                             // Trigger AI Analysis when swiping to the 4th page
                             LaunchedEffect(pagerState.currentPage) {
-                                if (pagerState.currentPage == 3 && state.aiAnalysis == null) {
+                                if (pagerState.currentPage == 3 && state.aiAnalysis == null && isPro) {
                                     viewModel.triggerAiPortfolioAnalysis()
                                 }
                             }
@@ -129,7 +218,7 @@ fun PortfolioScreen(
                                         0 -> 290.dp // Overview with chart
                                         1 -> (40 + (industryData.size * 35)).dp.coerceIn(160.dp, 450.dp) // Dynamic height for industries
                                         2 -> 250.dp // Insights
-                                        3 -> 450.dp // AI Analysis (Fixed height with scrolling)
+                                        3 -> if (isPro) 450.dp else 250.dp // AI Analysis (Fixed height with scrolling)
                                         else -> 250.dp
                                     },
                                     label = "CardHeightAnimation"
@@ -268,53 +357,59 @@ fun PortfolioScreen(
                                                 }
                                             }
                                             3 -> { // AI Analysis Card
-                                                val analysis = state.aiAnalysis
-                                                if (analysis != null) {
-                                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White)
-                                                        Spacer(modifier = Modifier.width(8.dp))
-                                                        Text("AI Portfolio Analysis", color = Color.White, fontWeight = FontWeight.Bold)
-                                                    }
-                                                    Spacer(modifier = Modifier.height(12.dp))
-                                                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                                        Column {
-                                                            Text("Risk Level", color = Color.Gray, fontSize = 12.sp)
-                                                            Text(analysis.riskLevel, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                                if (isPro) {
+                                                    val analysis = state.aiAnalysis
+                                                    if (analysis != null) {
+                                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                                            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White)
+                                                            Spacer(modifier = Modifier.width(8.dp))
+                                                            Text("AI Portfolio Analysis", color = Color.White, fontWeight = FontWeight.Bold)
                                                         }
-                                                        Column(horizontalAlignment = Alignment.End) {
-                                                            Text("Diversification", color = Color.Gray, fontSize = 12.sp)
-                                                            Text("${analysis.diversificationScore}%", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                                                        }
-                                                    }
-                                                    Spacer(modifier = Modifier.height(8.dp))
-                                                    Text(
-                                                        text = analysis.outlook, 
-                                                        color = Color.White.copy(alpha = 0.9f), 
-                                                        fontSize = 13.sp, 
-                                                        fontStyle = androidx.compose.ui.text.font.FontStyle.Normal,
-                                                        lineHeight = 18.sp
-                                                    )
-                                                    Spacer(modifier = Modifier.height(14.dp))
-                                                    Text("Strategic Recommendations:", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                                                    Spacer(modifier = Modifier.height(8.dp))
-                                                    Column {
-                                                        analysis.recommendations.forEach { rec ->
-                                                            Row(verticalAlignment = Alignment.Top, modifier = Modifier.padding(bottom = 6.dp)) {
-                                                                Text("•", color = Color.White, fontSize = 14.sp, modifier = Modifier.padding(end = 4.dp))
-                                                                Text(rec, color = Color.Gray, fontSize = 13.sp, lineHeight = 18.sp)
+                                                        Spacer(modifier = Modifier.height(12.dp))
+                                                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                                            Column {
+                                                                Text("Risk Level", color = Color.Gray, fontSize = 12.sp)
+                                                                Text(analysis.riskLevel, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                                            }
+                                                            Column(horizontalAlignment = Alignment.End) {
+                                                                Text("Diversification", color = Color.Gray, fontSize = 12.sp)
+                                                                Text("${analysis.diversificationScore}%", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                                                             }
                                                         }
+                                                        Spacer(modifier = Modifier.height(8.dp))
+                                                        Text(
+                                                            text = analysis.outlook, 
+                                                            color = Color.White.copy(alpha = 0.9f), 
+                                                            fontSize = 13.sp, 
+                                                            fontStyle = androidx.compose.ui.text.font.FontStyle.Normal,
+                                                            lineHeight = 18.sp
+                                                        )
+                                                        Spacer(modifier = Modifier.height(14.dp))
+                                                        Text("Strategic Recommendations:", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                                        Spacer(modifier = Modifier.height(8.dp))
+                                                        Column {
+                                                            analysis.recommendations.forEach { rec ->
+                                                                Row(verticalAlignment = Alignment.Top, modifier = Modifier.padding(bottom = 6.dp)) {
+                                                                    Text("•", color = Color.White, fontSize = 14.sp, modifier = Modifier.padding(end = 4.dp))
+                                                                    Text(rec, color = Color.Gray, fontSize = 13.sp, lineHeight = 18.sp)
+                                                                }
+                                                            }
+                                                        }
+                                                        Spacer(modifier = Modifier.height(24.dp)) // Padding at bottom for scroll
+                                                    } else {
+                                                        Column(
+                                                            modifier = Modifier.fillMaxSize(),
+                                                            verticalArrangement = Arrangement.Center,
+                                                            horizontalAlignment = Alignment.CenterHorizontally
+                                                        ) {
+                                                            LoadingIndicator(color = Color.White, modifier = Modifier.size(32.dp))
+                                                            Spacer(modifier = Modifier.height(16.dp))
+                                                            Text("Gemini is analyzing your portfolio...", color = Color.Gray, fontSize = 12.sp)
+                                                        }
                                                     }
-                                                    Spacer(modifier = Modifier.height(24.dp)) // Padding at bottom for scroll
                                                 } else {
-                                                    Column(
-                                                        modifier = Modifier.fillMaxSize(),
-                                                        verticalArrangement = Arrangement.Center,
-                                                        horizontalAlignment = Alignment.CenterHorizontally
-                                                    ) {
-                                                        LoadingIndicator(color = Color.White, modifier = Modifier.size(32.dp))
-                                                        Spacer(modifier = Modifier.height(16.dp))
-                                                        Text("Gemini is analyzing your portfolio...", color = Color.Gray, fontSize = 12.sp)
+                                                    PortfolioAiLockedContent {
+                                                        navController.navigate("upgrade_screen")
                                                     }
                                                 }
                                             }
@@ -487,6 +582,33 @@ fun PortfolioScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun PortfolioAiLockedContent(onUpgradeClick: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(Icons.Default.Lock, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(48.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+        Text("AI Analysis Locked", color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Upgrade to Pro for personalized AI-powered portfolio strategies.",
+            color = Color.Gray,
+            textAlign = TextAlign.Center,
+            fontSize = 14.sp
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(
+            onClick = onUpgradeClick,
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text("UPGRADE TO PRO")
         }
     }
 }

@@ -26,8 +26,7 @@ class DailyHistoryWorker @AssistedInject constructor(
             
             // Calculate total account value
             val balance = repository.getUserBalance().first()
-            val portfolio = repository.getPortfolioWithQuotes(forceRefresh = true)
-            val totalStockValue = portfolio.sumOf { it.first.price * it.second }
+            val totalStockValue = repository.getTotalPortfoliosValue()
             val totalAccountValue = balance + totalStockValue
 
             if (totalAccountValue > 0) {

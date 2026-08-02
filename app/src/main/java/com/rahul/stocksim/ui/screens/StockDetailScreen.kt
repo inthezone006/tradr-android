@@ -372,7 +372,7 @@ fun StockDetailScreen(
                             }
                             
                             LaunchedEffect(pagerState.currentPage) {
-                                if (pagerState.currentPage == 3 && state.aiAnalysis == null) {
+                                if (pagerState.currentPage == 3 && state.aiAnalysis == null && isPro) {
                                     viewModel.triggerAiAnalysis()
                                 }
                             }
@@ -398,7 +398,15 @@ fun StockDetailScreen(
                                                 0 -> StatsPage(state)
                                                 1 -> AboutPage(state)
                                                 2 -> InsidersPage(state)
-                                                3 -> DeepAiPage(state)
+                                                3 -> {
+                                                    if (isPro) {
+                                                        DeepAiPage(state)
+                                                    } else {
+                                                        StockAiLockedContent {
+                                                            navController.navigate("upgrade_screen")
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -745,6 +753,33 @@ fun AboutPage(state: StockDetailUiState.Success) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         StatItem("Industry", profile?.finnhubIndustry ?: "N/A", alignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f))
         StatItem("Country", profile?.country ?: "N/A", alignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+fun StockAiLockedContent(onUpgradeClick: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(Icons.Default.Lock, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(40.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+        Text("Deep AI Locked", color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Upgrade to Pro to unlock comprehensive AI-powered stock analysis.",
+            color = Color.Gray,
+            textAlign = TextAlign.Center,
+            fontSize = 13.sp
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        Button(
+            onClick = onUpgradeClick,
+            shape = RoundedCornerShape(10.dp)
+        ) {
+            Text("UPGRADE NOW", fontSize = 12.sp)
+        }
     }
 }
 

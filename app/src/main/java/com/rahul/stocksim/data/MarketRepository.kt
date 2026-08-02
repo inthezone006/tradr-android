@@ -268,6 +268,16 @@ class MarketRepository @Inject constructor(
     
     private val apiKey = "d38davhr01qlbdj4vutgd38davhr01qlbdj4vuu0"
     val twelveDataApiKey = "e55badc51cfd4ba5b9ed060f2c048d57"
+    
+    val isPro = billingRepository.isPro
+
+    private val _currentPortfolioId = MutableStateFlow("default")
+    val currentPortfolioId: StateFlow<String> = _currentPortfolioId.asStateFlow()
+
+    fun selectPortfolio(id: String) {
+        _currentPortfolioId.value = id
+        globalPortfolioCache = null
+    }
 
     suspend fun getSocialSentiment(symbol: String): Pair<Int, Int> {
         return try {
@@ -551,17 +561,17 @@ class MarketRepository @Inject constructor(
         }
     }
 
-    suspend fun getPortfolioWithQuotes(forceRefresh: Boolean = false): List<Pair<Stock, Long>> {
-        if (!forceRefresh && globalPortfolioCache != null) return globalPortfolioCache!!
+    suspend fun getPortfolioWithQuotes(forceRefresh: Boolean = false, portfolioId: String = "default"): List<Pair<Stock, Long>> {
+        if (!forceRefresh && portfolioId == "default" && globalPortfolioCache != null) return globalPortfolioCache!!
         return try {
-            val rawPortfolio = getPortfolio()
+            val rawPortfolio = getPortfolio(portfolioId)
             if (rawPortfolio.isEmpty()) return emptyList()
             val stocks = getStocksQuotes(rawPortfolio.map { it.first })
             val portfolioWithQuotes = rawPortfolio.mapNotNull { (symbol, qty) ->
                 val stock = stocks.find { it.symbol == symbol }
                 if (stock != null) stock to qty else null
             }
-            if (portfolioWithQuotes.isNotEmpty()) {
+            if (portfolioWithQuotes.isNotEmpty() && portfolioId == "default") {
                 globalPortfolioCache = portfolioWithQuotes
                 if (portfolioWithQuotes.size >= 5) {
                     updateAchievementProgress("diversified", 1f)
@@ -573,10 +583,10 @@ class MarketRepository @Inject constructor(
                     updateAchievementProgress("diversified_sector", 1f)
                 }
             }
-            globalPortfolioCache ?: emptyList()
+            portfolioWithQuotes
         } catch (e: Exception) {
             recordError(e)
-            globalPortfolioCache ?: emptyList()
+            if (portfolioId == "default") globalPortfolioCache ?: emptyList() else emptyList()
         }
     }
 
@@ -997,13 +1007,50 @@ class MarketRepository @Inject constructor(
         }
     }
 
-    suspend fun buyStock(symbol: String, quantity: Int, pricePerShare: Double, userId: String? = null): Result<Double> {
+    suspend fun getPortfolios(): List<Portfolio> {
+        val userId = auth.currentUser?.uid ?: return emptyList()
+        return try {
+            val snapshot = firestore.collection("users").document(userId).collection("portfolios").get().await()
+            val portfolios = snapshot.toObjects(Portfolio::class.java).toMutableList()
+            if (portfolios.none { it.id == "default" }) {
+                portfolios.add(Portfolio(id = "default", name = "Main Portfolio", isDefault = true))
+            }
+            portfolios.sortedByDescending { it.isDefault }
+        } catch (e: Exception) {
+            recordError(e)
+            listOf(Portfolio(id = "default", name = "Main Portfolio", isDefault = true))
+        }
+    }
+
+    suspend fun createPortfolio(name: String): Result<Portfolio> {
+        val userId = auth.currentUser?.uid ?: return Result.failure(Exception("Not logged in"))
+        if (!billingRepository.isPro.value) {
+            return Result.failure(Exception("Upgrade to Pro to create multiple portfolios!"))
+        }
+        
+        return try {
+            val docRef = firestore.collection("users").document(userId).collection("portfolios").document()
+            val portfolio = Portfolio(id = docRef.id, name = name, isDefault = false)
+            docRef.set(portfolio).await()
+            Result.success(portfolio)
+        } catch (e: Exception) {
+            recordError(e)
+            Result.failure(e)
+        }
+    }
+
+    suspend fun buyStock(symbol: String, quantity: Int, pricePerShare: Double, portfolioId: String = "default", userId: String? = null): Result<Double> {
         val targetUserId = userId ?: auth.currentUser?.uid ?: return Result.failure(Exception("User not authenticated"))
         val totalCost = quantity * pricePerShare
         return try {
             var newBalance = 0.0
             val userRef = firestore.collection("users").document(targetUserId)
-            val portfolioRef = userRef.collection("portfolio").document(symbol)
+            val portfolioRef = if (portfolioId == "default") {
+                userRef.collection("portfolio").document(symbol)
+            } else {
+                userRef.collection("portfolios").document(portfolioId).collection("holdings").document(symbol)
+            }
+
             firestore.runTransaction { transaction ->
                 val currentBalance = (transaction.get(userRef).get("balance") as? Number)?.toDouble() ?: 0.0
                 val portfolioDoc = transaction.get(portfolioRef)
@@ -1081,12 +1128,16 @@ class MarketRepository @Inject constructor(
         }
     }
 
-    suspend fun sellStock(symbol: String, quantity: Int, pricePerShare: Double, userId: String? = null): Result<Double> {
+    suspend fun sellStock(symbol: String, quantity: Int, pricePerShare: Double, portfolioId: String = "default", userId: String? = null): Result<Double> {
         val targetUserId = userId ?: auth.currentUser?.uid ?: return Result.failure(Exception("User not authenticated"))
         val totalGain = quantity * pricePerShare
         return try {
             val userRef = firestore.collection("users").document(targetUserId)
-            val portfolioRef = userRef.collection("portfolio").document(symbol)
+            val portfolioRef = if (portfolioId == "default") {
+                userRef.collection("portfolio").document(symbol)
+            } else {
+                userRef.collection("portfolios").document(portfolioId).collection("holdings").document(symbol)
+            }
             
             var resultDays = -1L
             var resultInstantSell = false
@@ -1128,6 +1179,16 @@ class MarketRepository @Inject constructor(
         } catch (e: Exception) {
             recordError(e); Result.failure(e)
         }
+    }
+
+    suspend fun getTotalPortfoliosValue(): Double {
+        val portfolios = getPortfolios()
+        var total = 0.0
+        portfolios.forEach { portfolio ->
+            val holdings = getPortfolioWithQuotes(forceRefresh = false, portfolioId = portfolio.id)
+            total += holdings.sumOf { it.first.price * it.second }
+        }
+        return total
     }
 
     suspend fun getTwelveDataQuote(symbol: String): Stock? {
@@ -1410,10 +1471,16 @@ class MarketRepository @Inject constructor(
 
     fun getCurrentUserId(): String? = auth.currentUser?.uid
 
-    suspend fun getPortfolio(): List<Pair<String, Long>> {
+    suspend fun getPortfolio(portfolioId: String = "default"): List<Pair<String, Long>> {
         val userId = auth.currentUser?.uid ?: return emptyList()
+        val colRef = if (portfolioId == "default") {
+            firestore.collection("users").document(userId).collection("portfolio")
+        } else {
+            firestore.collection("users").document(userId).collection("portfolios").document(portfolioId).collection("holdings")
+        }
+        
         return try {
-            firestore.collection("users").document(userId).collection("portfolio").get().await().documents.map { 
+            colRef.get().await().documents.map { 
                 it.getString("symbol").orEmpty() to ((it.get("quantity") as? Number)?.toLong() ?: 0L) 
             }
         } catch (e: Exception) { recordError(e); emptyList() }

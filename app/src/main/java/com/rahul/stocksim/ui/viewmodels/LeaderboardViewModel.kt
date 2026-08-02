@@ -76,7 +76,8 @@ class LeaderboardViewModel @Inject constructor() : ViewModel() {
                             totalAccountValue = (doc.get("totalAccountValue") as? Number)?.toDouble() 
                                 ?: (doc.get("balance") as? Number)?.toDouble() ?: 0.0,
                             photoUrl = doc.getString("photoUrl"),
-                            level = ((doc.get("level") as? Number)?.toLong() ?: 4L).toInt()
+                            level = ((doc.get("level") as? Number)?.toLong() ?: 4L).toInt(),
+                            isPro = doc.getBoolean("isPro") ?: false
                         )
                     }
                     updateCache(level, users)
@@ -103,7 +104,8 @@ class LeaderboardViewModel @Inject constructor() : ViewModel() {
                             totalAccountValue = (doc.get("totalAccountValue") as? Number)?.toDouble() 
                                 ?: (doc.get("balance") as? Number)?.toDouble() ?: 0.0,
                             photoUrl = doc.getString("photoUrl"),
-                            level = ((doc.get("level") as? Number)?.toLong() ?: 4L).toInt()
+                            level = ((doc.get("level") as? Number)?.toLong() ?: 4L).toInt(),
+                            isPro = doc.getBoolean("isPro") ?: false
                         )
                     }
                     
