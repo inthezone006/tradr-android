@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil.compose.AsyncImage
-import androidx.compose.foundation.BorderStroke
 import com.rahul.stocksim.model.Stock
 import com.rahul.stocksim.ui.viewmodels.InsightsUiState
 import com.rahul.stocksim.ui.viewmodels.InsightsViewModel
@@ -167,10 +166,11 @@ fun InsightsScreen(
 @Composable
 fun IndexCard(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Surface(
-        modifier = modifier.clickable { onClick() },
-        color = Color.White.copy(alpha = 0.05f),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(12.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -227,10 +227,11 @@ fun IndexCard(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Unit) 
 @Composable
 fun SectorItem(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Surface(
-        modifier = modifier.clickable { onClick() },
-        color = Color.White.copy(alpha = 0.05f),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.1f))
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(12.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -242,21 +243,37 @@ fun SectorItem(stock: Stock, modifier: Modifier = Modifier, onClick: () -> Unit)
                     .clip(RoundedCornerShape(10.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = getSectorIcon(stock.symbol),
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
+                if (!stock.logoUrl.isNullOrEmpty()) {
+                    AsyncImage(
+                        model = stock.logoUrl,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clip(RoundedCornerShape(6.dp)),
+                        contentScale = ContentScale.Fit
+                    )
+                } else {
+                    Icon(
+                        imageVector = getSectorIcon(stock.symbol),
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(stock.name, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                Text(stock.symbol, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(stock.name, color = Color.Gray, fontSize = 12.sp, maxLines = 1)
+            }
+            
+            Column(horizontalAlignment = Alignment.End) {
+                Text("$${String.format(Locale.US, "%,.2f", stock.price)}", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 
-                val color = if (stock.percentChange >= 0) Color(0xFF4CAF50) else Color(0xFFF44336)
-                val prefix = if (stock.percentChange >= 0) "+" else ""
+                val color = if (stock.change >= 0) Color(0xFF4CAF50) else Color(0xFFF44336)
+                val prefix = if (stock.change >= 0) "+" else ""
                 Text(
                     text = "$prefix${String.format(Locale.US, "%.2f", stock.percentChange)}%",
                     color = color,
