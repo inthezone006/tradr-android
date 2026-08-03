@@ -64,26 +64,18 @@ class BillingRepository @Inject constructor(
 
     private fun queryPurchases() {
         val params = QueryPurchasesParams.newBuilder()
-            .setProductType(BillingClient.ProductType.SUBS)
+            .setProductType(BillingClient.ProductType.INAPP)
             .build()
 
         billingClient.queryPurchasesAsync(params) { billingResult, purchases ->
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 val hasPro = purchases.any { purchase ->
-                    purchase.products.contains("tradr_pro") && purchase.purchaseState == Purchase.PurchaseState.PURCHASED
+                    (purchase.products.contains("tradr_pro") || purchase.products.contains("tradr-pro")) 
+                            && purchase.purchaseState == Purchase.PurchaseState.PURCHASED
                 }
                 _isPro.value = hasPro
                 if (hasPro) {
                     syncProStatusWithFirebase()
-                }
-            } else if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                // Also check INAPP as fallback if you previously used it
-                val inAppParams = QueryPurchasesParams.newBuilder()
-                    .setProductType(BillingClient.ProductType.INAPP)
-                    .build()
-                billingClient.queryPurchasesAsync(inAppParams) { _, inAppPurchases ->
-                    val hasPro = inAppPurchases.any { it.products.contains("tradr_pro") }
-                    if (hasPro) _isPro.value = true
                 }
             }
         }
@@ -94,7 +86,11 @@ class BillingRepository @Inject constructor(
         val productList = listOf(
             QueryProductDetailsParams.Product.newBuilder()
                 .setProductId("tradr_pro")
-                .setProductType(BillingClient.ProductType.SUBS)
+                .setProductType(BillingClient.ProductType.INAPP)
+                .build(),
+            QueryProductDetailsParams.Product.newBuilder()
+                .setProductId("tradr-pro")
+                .setProductType(BillingClient.ProductType.INAPP)
                 .build()
         )
 
@@ -105,12 +101,10 @@ class BillingRepository @Inject constructor(
         billingClient.queryProductDetailsAsync(params) { billingResult, queryProductDetailsResult ->
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 val productDetailsList = queryProductDetailsResult.productDetailsList ?: emptyList()
-                var productDetails: ProductDetails? = null
-                for (pd in productDetailsList) {
-                    if (pd.productId == "tradr_pro") {
-                        productDetails = pd
-                        break
-                    }
+                
+                // Try to find either version of the ID
+                val productDetails = productDetailsList.find { 
+                    it.productId == "tradr_pro" || it.productId == "tradr-pro" 
                 }
                 
                 if (productDetails != null) {
@@ -126,7 +120,7 @@ class BillingRepository @Inject constructor(
 
                     billingClient.launchBillingFlow(activity, flowParams)
                 } else {
-                    _purchaseStatus.value = PurchaseStatus.Error("Product not found")
+                    _purchaseStatus.value = PurchaseStatus.Error("Product not found (Check tradr_pro or tradr-pro)")
                 }
             } else {
                 _purchaseStatus.value = PurchaseStatus.Error("Error fetching product details: ${billingResult.debugMessage}")

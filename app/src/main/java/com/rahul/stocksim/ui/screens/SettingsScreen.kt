@@ -152,19 +152,18 @@ fun SettingsScreen(
                     )
                     if (isPro) {
                         SettingsItem(
-                            icon = Icons.Default.Payments,
-                            label = "Subscription",
-                            value = "Manage subscription",
+                            icon = Icons.Default.History,
+                            label = "Membership",
+                            value = "View purchase history",
                             onClick = {
-                                val packageName = context.packageName
                                 val intent = Intent(Intent.ACTION_VIEW).apply {
-                                    data = Uri.parse("https://play.google.com/store/account/subscriptions?package=$packageName&sku=tradr_pro")
+                                    data = Uri.parse("https://play.google.com/store/account/orderhistory")
                                     setPackage("com.android.vending")
                                 }
                                 try {
                                     context.startActivity(intent)
                                 } catch (e: Exception) {
-                                    val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/account/subscriptions"))
+                                    val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/account/orderhistory"))
                                     context.startActivity(webIntent)
                                 }
                             }

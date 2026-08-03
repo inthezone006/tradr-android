@@ -200,7 +200,7 @@ fun RegisterScreen(navController: NavController) {
                                         fontSize = 16.sp
                                     )
                                     Text(
-                                        text = "Unlock AI analysis & unlimited watchlist for $1.00",
+                                        text = "Unlock AI analysis & unlimited watchlist for $0.99",
                                         color = Color.Gray,
                                         fontSize = 12.sp
                                     )
