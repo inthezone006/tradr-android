@@ -45,11 +45,17 @@ class PortfolioViewModel @Inject constructor(
     val isPro = marketRepository.isPro
 
     init {
-        loadData(false)
         loadPortfolios()
         loadContracts()
         loadExecutedContracts()
-        loadHistory()
+        
+        // Reactively load data whenever the selected portfolio changes
+        viewModelScope.launch {
+            selectedPortfolioId.collectLatest { id ->
+                loadData(false)
+                loadHistory()
+            }
+        }
     }
 
     fun loadPortfolios() {
@@ -62,7 +68,7 @@ class PortfolioViewModel @Inject constructor(
 
     fun selectPortfolio(portfolioId: String) {
         marketRepository.selectPortfolio(portfolioId)
-        loadData(true)
+        // loadData(true) is now handled automatically by the selectedPortfolioId observer in init
     }
 
     suspend fun createPortfolio(name: String, initialBalance: Double): Result<Portfolio> {
@@ -137,10 +143,9 @@ class PortfolioViewModel @Inject constructor(
     }
 
     fun loadHistory() {
+        val portfolioId = selectedPortfolioId.value
         viewModelScope.launch {
-            marketRepository.currentPortfolioId.flatMapLatest { id ->
-                marketRepository.getPortfolioHistory(id)
-            }.collect {
+            marketRepository.getPortfolioHistory(portfolioId).collect {
                 _portfolioHistory.value = it
             }
         }
@@ -164,7 +169,7 @@ class PortfolioViewModel @Inject constructor(
                 val portfolioItems = marketRepository.getPortfolioWithQuotes(forceRefresh, portfolioId)
                 
                 // 1. Calculate current real-time values
-                val balance = marketRepository.getUserBalance().first()
+                val balance = marketRepository.getUserBalance(portfolioId).first()
                 val totalStockValue = portfolioItems.sumOf { it.first.price * it.second }
                 val totalAccountValue = balance + totalStockValue
                 

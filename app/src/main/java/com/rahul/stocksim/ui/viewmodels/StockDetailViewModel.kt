@@ -272,8 +272,9 @@ class StockDetailViewModel @Inject constructor(
                 _isRefreshing.value = false
 
                 // 6. Background load for persistent user data
+                val portfolioId = marketRepository.currentPortfolioId.value
                 _isInWatchlist.value = marketRepository.getWatchlist().any { it.symbol == stockSymbol }
-                _ownedQuantity.value = marketRepository.getPortfolio().find { it.first == stockSymbol }?.second ?: 0L
+                _ownedQuantity.value = marketRepository.getPortfolio(portfolioId).find { it.first == stockSymbol }?.second ?: 0L
 
             } catch (e: Exception) {
                 _uiState.value = StockDetailUiState.Error(e.message ?: "Unknown error")
@@ -367,12 +368,13 @@ class StockDetailViewModel @Inject constructor(
 
     suspend fun buyOption(isCall: Boolean, strikePrice: Double, premium: Double, contracts: Int): Result<Unit> {
         val stockSymbol = symbol ?: return Result.failure(Exception("No symbol"))
+        val portfolioId = marketRepository.currentPortfolioId.value
         
         // Option contracts are usually 100 shares each
         val totalCost = premium * 100 * contracts
         
         // Check balance first (Wait for first value from flow)
-        val balance = marketRepository.getUserBalance().first()
+        val balance = marketRepository.getUserBalance(portfolioId).first()
         if (balance < totalCost) return Result.failure(Exception("Insufficient balance for premium"))
 
         // Create the contract
