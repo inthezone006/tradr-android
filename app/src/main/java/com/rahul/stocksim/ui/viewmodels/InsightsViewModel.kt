@@ -31,8 +31,12 @@ class InsightsViewModel @Inject constructor(
     private val _recommendations = MutableStateFlow<String?>(null)
     val recommendations: StateFlow<String?> = _recommendations.asStateFlow()
 
+    private val _strategyPicks = MutableStateFlow<List<StrategyPick>>(emptyList())
+    val strategyPicks: StateFlow<List<StrategyPick>> = _strategyPicks.asStateFlow()
+
     init {
         loadInsights()
+        loadStrategyPicks()
     }
 
     fun refresh() {
@@ -68,7 +72,31 @@ class InsightsViewModel @Inject constructor(
             _recommendations.value = recs
         }
     }
+
+    private fun loadStrategyPicks() {
+        viewModelScope.launch {
+            val growthSymbols = listOf("NVDA", "TSLA", "AMD")
+            val dividendSymbols = listOf("KO", "JNJ", "PG")
+            val defensiveSymbols = listOf("WMT", "MCD", "COST")
+            val valueSymbols = listOf("BRK-B", "JPM", "V")
+
+            val allSymbols = growthSymbols + dividendSymbols + defensiveSymbols + valueSymbols
+            val quotes = marketRepository.getStocksQuotes(allSymbols)
+
+            _strategyPicks.value = listOf(
+                StrategyPick("Growth", quotes.filter { it.symbol in growthSymbols }),
+                StrategyPick("Dividend", quotes.filter { it.symbol in dividendSymbols }),
+                StrategyPick("Defensive", quotes.filter { it.symbol in defensiveSymbols }),
+                StrategyPick("Value", quotes.filter { it.symbol in valueSymbols })
+            )
+        }
+    }
 }
+
+data class StrategyPick(
+    val strategy: String,
+    val stocks: List<com.rahul.stocksim.model.Stock>
+)
 
 sealed class InsightsUiState {
     object Loading : InsightsUiState()

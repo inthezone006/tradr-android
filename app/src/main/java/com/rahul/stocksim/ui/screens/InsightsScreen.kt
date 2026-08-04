@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ShowChart
@@ -34,6 +36,7 @@ import coil.compose.AsyncImage
 import com.rahul.stocksim.model.Stock
 import com.rahul.stocksim.ui.viewmodels.InsightsUiState
 import com.rahul.stocksim.ui.viewmodels.InsightsViewModel
+import com.rahul.stocksim.ui.viewmodels.StrategyPick
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -47,6 +50,7 @@ fun InsightsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val isPro by viewModel.isPro.collectAsState()
     val recommendations by viewModel.recommendations.collectAsState()
+    val strategyPicks by viewModel.strategyPicks.collectAsState()
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
 
@@ -158,7 +162,11 @@ fun InsightsScreen(
                                 4 -> { // Pro Picks
                                     item {
                                         if (isPro) {
-                                            ProRecommendationsContent(recommendations)
+                                            ProRecommendationsContent(
+                                                recommendations = recommendations,
+                                                strategyPicks = strategyPicks,
+                                                onStockClick = onStockClick
+                                            )
                                         } else {
                                             ProLockedContent(onUpgradeClick)
                                         }
@@ -180,7 +188,11 @@ fun InsightsScreen(
 }
 
 @Composable
-fun ProRecommendationsContent(recommendations: String?) {
+fun ProRecommendationsContent(
+    recommendations: String?,
+    strategyPicks: List<StrategyPick>,
+    onStockClick: (Stock) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -241,6 +253,100 @@ fun ProRecommendationsContent(recommendations: String?) {
                     )
                 }
             }
+        }
+
+        if (strategyPicks.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                text = "Strategy Recommendations",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+            Text(
+                text = "Hand-picked stocks aligned with specific market strategies.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray,
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            strategyPicks.forEach { pick ->
+                Text(
+                    text = pick.strategy.uppercase(),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = 4.dp, bottom = 12.dp, top = 8.dp)
+                )
+                
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    pick.stocks.forEach { stock ->
+                        RecommendedStockCard(stock) { onStockClick(stock) }
+                    }
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun RecommendedStockCard(stock: Stock, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.width(160.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (!stock.logoUrl.isNullOrEmpty()) {
+                    AsyncImage(
+                        model = stock.logoUrl,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp).clip(RoundedCornerShape(4.dp))
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier.size(24.dp).background(Color.DarkGray, RoundedCornerShape(4.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(stock.symbol.take(1), color = Color.White, fontSize = 10.sp)
+                    }
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stock.symbol,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Text(
+                text = "$${String.format(Locale.US, "%,.2f", stock.price)}",
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Black
+            )
+            
+            val color = if (stock.change >= 0) Color(0xFF4CAF50) else Color(0xFFF44336)
+            Text(
+                text = "${if (stock.change >= 0) "+" else ""}${String.format(Locale.US, "%.2f", stock.percentChange)}%",
+                color = color,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
