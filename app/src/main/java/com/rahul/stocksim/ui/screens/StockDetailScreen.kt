@@ -1608,6 +1608,11 @@ fun parseMarkdown(markdown: String): AnnotatedString {
                 )) {
                     appendFormatted(content)
                 }
+            } else if (trimmedLine == "---" || trimmedLine == "***") {
+                // Horizontal rule
+                withStyle(style = SpanStyle(color = Color.White.copy(alpha = 0.2f))) {
+                    append("────────────────────────────────")
+                }
             } else if (trimmedLine.startsWith("**") && trimmedLine.endsWith("**") && trimmedLine.length > 4) {
                 // Treat entire bold lines as section titles
                 val content = trimmedLine.substring(2, trimmedLine.length - 2).trim()
@@ -1636,13 +1641,27 @@ fun parseMarkdown(markdown: String): AnnotatedString {
 
 private fun AnnotatedString.Builder.appendFormatted(text: String) {
     var currentIndex = 0
-    val boldRegex = Regex("(\\*\\*|__)(.*?)\\1")
-    val matches = boldRegex.findAll(text)
+    // Order matters here to catch longer matches first
+    // *** for bold italic
+    // ** for bold
+    // * for italic
+    val combinedRegex = Regex("(\\*\\*\\*|\\*\\*|\\*)(.*?)\\1")
+    val matches = combinedRegex.findAll(text)
     
     for (match in matches) {
         append(text.substring(currentIndex, match.range.first))
-        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.White)) {
-            append(match.groupValues[2])
+        val marker = match.groupValues[1]
+        val content = match.groupValues[2]
+        
+        val style = when (marker) {
+            "***" -> SpanStyle(fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic, color = Color.White)
+            "**" -> SpanStyle(fontWeight = FontWeight.Bold, color = Color.White)
+            "*" -> SpanStyle(fontStyle = FontStyle.Italic, color = Color.White)
+            else -> SpanStyle()
+        }
+        
+        withStyle(style = style) {
+            append(content)
         }
         currentIndex = match.range.last + 1
     }
