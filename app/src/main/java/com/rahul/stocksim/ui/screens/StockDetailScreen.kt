@@ -59,7 +59,6 @@ import com.rahul.stocksim.model.*
 import com.rahul.stocksim.ui.components.PillButton
 import com.rahul.stocksim.ui.components.TradingViewChart
 import com.rahul.stocksim.ui.components.VicoLineChart
-import com.rahul.stocksim.ui.components.VicoCandlestickChart
 import com.rahul.stocksim.ui.viewmodels.StockDetailUiState
 import com.rahul.stocksim.ui.viewmodels.StockDetailViewModel
 import com.rahul.stocksim.util.ReviewHelper
@@ -89,7 +88,6 @@ fun StockDetailScreen(
     val reviewHelper = remember { ReviewHelper(context as Activity) }
 
     var showAlertDialog by remember { mutableStateOf(false) }
-    var showCandlesticks by remember { mutableStateOf(false) }
     var showContractsSheet by remember { mutableStateOf(false) }
     var showActiveContractsListSheet by remember { mutableStateOf(false) }
     
@@ -278,11 +276,6 @@ fun StockDetailScreen(
                                 ) {
                                     if (isGraphLoading) {
                                         LoadingIndicator(modifier = Modifier.align(Alignment.Center), color = Color.White)
-                                    } else if (showCandlesticks && state.candleHistory.isNotEmpty()) {
-                                        VicoCandlestickChart(
-                                            history = state.candleHistory,
-                                            modifier = Modifier.fillMaxSize()
-                                        )
                                     } else if (history.isNotEmpty()) {
                                         Column {
                                             VicoLineChart(
@@ -300,21 +293,6 @@ fun StockDetailScreen(
                                                     .padding(8.dp),
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                if (isPro && state.candleHistory.isNotEmpty()) {
-                                                    IconButton(
-                                                        onClick = { showCandlesticks = !showCandlesticks },
-                                                        modifier = Modifier.size(32.dp)
-                                                    ) {
-                                                        Icon(
-                                                            imageVector = if (showCandlesticks) Icons.AutoMirrored.Filled.ShowChart else Icons.Default.BarChart,
-                                                            contentDescription = "Toggle Chart Type",
-                                                            tint = Color.White,
-                                                            modifier = Modifier.size(20.dp)
-                                                        )
-                                                    }
-                                                    Spacer(modifier = Modifier.width(8.dp))
-                                                }
-                                                
                                                 Row(
                                                     modifier = Modifier.weight(1f),
                                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -1612,7 +1590,7 @@ fun parseMarkdown(markdown: String): AnnotatedString {
         val lines = markdown.split("\n")
         lines.forEachIndexed { index, line ->
             val trimmedLine = line.trim()
-            val headerMatch = Regex("^(#{1,3})\\s+(.*)").find(trimmedLine)
+            val headerMatch = Regex("^(#{1,4})\\s+(.*)").find(trimmedLine)
             
             if (headerMatch != null) {
                 val level = headerMatch.groupValues[1].length
@@ -1620,7 +1598,8 @@ fun parseMarkdown(markdown: String): AnnotatedString {
                 val fontSize = when(level) {
                     1 -> 22.sp
                     2 -> 19.sp
-                    else -> 17.sp
+                    3 -> 17.sp
+                    else -> 15.sp
                 }
                 withStyle(style = SpanStyle(
                     fontWeight = FontWeight.Black, 
@@ -1639,6 +1618,11 @@ fun parseMarkdown(markdown: String): AnnotatedString {
                 )) {
                     append(content)
                 }
+            } else if ((trimmedLine.startsWith("*") || trimmedLine.startsWith("-")) && trimmedLine.length > 1) {
+                // Bullet points
+                val content = if (trimmedLine.get(1) == ' ') trimmedLine.substring(2) else trimmedLine.substring(1)
+                append("  • ")
+                appendFormatted(content.trim())
             } else {
                 appendFormatted(line)
             }

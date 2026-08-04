@@ -31,6 +31,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,9 +44,9 @@ import com.rahul.stocksim.data.StockPricePoint
 import com.rahul.stocksim.model.Stock
 import com.rahul.stocksim.model.Portfolio
 import com.rahul.stocksim.model.TradeContract
-import com.rahul.stocksim.ui.components.StockRow
-import com.rahul.stocksim.ui.components.VicoLineChart
-import com.rahul.stocksim.ui.components.VicoPieChart
+import com.rahul.stocksim.model.ContractStatus
+import com.rahul.stocksim.ui.components.*
+import com.rahul.stocksim.ui.components.ModernTextField
 import com.rahul.stocksim.ui.viewmodels.PortfolioUiState
 import com.rahul.stocksim.ui.viewmodels.PortfolioViewModel
 import com.google.accompanist.pager.HorizontalPagerIndicator
@@ -70,6 +71,127 @@ fun PortfolioScreen(
     
     var showAiSheet by remember { mutableStateOf(false) }
     var showPortfolioSelector by remember { mutableStateOf(false) }
+    
+    var selectedPortfolioForAction by remember { mutableStateOf<Portfolio?>(null) }
+    var showPortfolioActionSheet by remember { mutableStateOf(false) }
+    var showRenameSheet by remember { mutableStateOf(false) }
+    var renameValue by remember { mutableStateOf("") }
+
+    if (showRenameSheet && selectedPortfolioForAction != null) {
+        ModalBottomSheet(
+            onDismissRequest = { showRenameSheet = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = Color.White
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                Text(
+                    text = "Rename Portfolio",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+
+                ModernTextField(
+                    value = renameValue,
+                    onValueChange = { renameValue = it },
+                    label = "New Name"
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                PillButton(
+                    text = "Save Changes",
+                    onClick = {
+                        if (renameValue.isNotBlank()) {
+                            viewModel.renamePortfolio(selectedPortfolioForAction!!.id, renameValue)
+                            showRenameSheet = false
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+
+    if (showPortfolioActionSheet && selectedPortfolioForAction != null) {
+        val p = selectedPortfolioForAction!!
+        ModalBottomSheet(
+            onDismissRequest = { showPortfolioActionSheet = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = Color.White
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                Text(
+                    text = p.name,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+
+                val isCurrent = p.id == selectedPortfolioId
+
+                if (!isCurrent) {
+                    ActionItem(
+                        icon = Icons.Default.SwapHoriz,
+                        label = "Switch to this Portfolio",
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            viewModel.selectPortfolio(p.id)
+                            showPortfolioActionSheet = false
+                            showPortfolioSelector = false
+                        }
+                    )
+                }
+
+                if (!p.isPrimary) {
+                    ActionItem(
+                        icon = Icons.Default.Edit,
+                        label = "Rename Portfolio",
+                        onClick = {
+                            renameValue = p.name
+                            showRenameSheet = true
+                            showPortfolioActionSheet = false
+                        }
+                    )
+                    
+                    ActionItem(
+                        icon = Icons.Default.Delete,
+                        label = "Delete Portfolio",
+                        color = Color.Red,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            viewModel.deletePortfolio(p.id)
+                            showPortfolioActionSheet = false
+                            // If we delete the current one, the VM logic will auto-switch to default
+                            if (isCurrent) {
+                                showPortfolioSelector = false
+                            }
+                        }
+                    )
+                } else {
+                    // For the Main Portfolio, if it's already current, show a small info text or just the switch
+                    if (isCurrent) {
+                        Text(
+                            text = "This is your active primary portfolio.",
+                            color = Color.Gray,
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     if (showPortfolioSelector) {
         ModalBottomSheet(
@@ -95,8 +217,9 @@ fun PortfolioScreen(
                     Surface(
                         onClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            viewModel.selectPortfolio(portfolio.id)
+                            selectedPortfolioForAction = portfolio
                             showPortfolioSelector = false
+                            showPortfolioActionSheet = true
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -115,7 +238,7 @@ fun PortfolioScreen(
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                                     color = Color.White
                                 )
-                                if (portfolio.isDefault) {
+                                if (portfolio.isPrimary) {
                                     Text("Primary Account", color = Color.Gray, fontSize = 11.sp)
                                 }
                             }
@@ -608,6 +731,29 @@ fun PortfolioScreen(
 }
 
 @Composable
+fun ActionItem(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    color: Color = Color.White
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        color = Color.Transparent
+    ) {
+        Row(
+            modifier = Modifier.padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(imageVector = icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(text = label, color = color, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+        }
+    }
+}
+
+@Composable
 fun PortfolioAiLockedContent(onUpgradeClick: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -640,7 +786,7 @@ fun InsightSummaryItem(
     label: String,
     value: String,
     subValue: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     color: Color
 ) {
     Surface(
@@ -659,7 +805,7 @@ fun InsightSummaryItem(
 }
 
 @Composable
-fun InsightItem(label: String, value: String, icon: androidx.compose.ui.graphics.vector.ImageVector, color: Color = Color.Gray) {
+fun InsightItem(label: String, value: String, icon: ImageVector, color: Color = Color.Gray) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(imageVector = icon, contentDescription = null, tint = color, modifier = Modifier.size(14.dp))
         Text(text = value, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)

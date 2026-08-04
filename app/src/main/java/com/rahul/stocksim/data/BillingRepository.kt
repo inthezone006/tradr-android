@@ -52,12 +52,16 @@ class BillingRepository @Inject constructor(
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                     Log.d("BillingRepository", "Billing setup finished")
                     queryPurchases()
+                } else {
+                    // If Play Store fails (common in debug), check Firebase as fallback
+                    scope.launch { refreshProStatus() }
                 }
             }
 
             override fun onBillingServiceDisconnected() {
                 Log.d("BillingRepository", "Billing service disconnected")
-                // Reconnect strategy can be added here
+                // Reconnect strategy
+                scope.launch { refreshProStatus() }
             }
         })
     }
@@ -73,10 +77,16 @@ class BillingRepository @Inject constructor(
                     (purchase.products.contains("tradr_pro") || purchase.products.contains("tradr-pro")) 
                             && purchase.purchaseState == Purchase.PurchaseState.PURCHASED
                 }
-                _isPro.value = hasPro
+                
                 if (hasPro) {
+                    _isPro.value = true
                     syncProStatusWithFirebase()
+                } else {
+                    // Google Play says no, but let's check Firebase before giving up
+                    scope.launch { refreshProStatus() }
                 }
+            } else {
+                scope.launch { refreshProStatus() }
             }
         }
     }

@@ -30,6 +30,19 @@ service cloud.firestore {
       match /account_history/{date} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
+
+      match /portfolios/{portfolioId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+
+        match /holdings/{symbol} {
+          allow read: if request.auth != null;
+          allow write: if request.auth != null && request.auth.uid == userId;
+        }
+
+        match /history/{date} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+      }
     }
   }
 }

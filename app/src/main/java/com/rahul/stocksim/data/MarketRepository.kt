@@ -1007,19 +1007,29 @@ class MarketRepository @Inject constructor(
         }
     }
 
-    suspend fun getPortfolios(): List<Portfolio> {
-        val userId = auth.currentUser?.uid ?: return emptyList()
-        return try {
-            val snapshot = firestore.collection("users").document(userId).collection("portfolios").get().await()
-            val portfolios = snapshot.toObjects(Portfolio::class.java).toMutableList()
-            if (portfolios.none { it.id == "default" }) {
-                portfolios.add(Portfolio(id = "default", name = "Main Portfolio", isDefault = true))
-            }
-            portfolios.sortedByDescending { it.isDefault }
-        } catch (e: Exception) {
-            recordError(e)
-            listOf(Portfolio(id = "default", name = "Main Portfolio", isDefault = true))
+    fun getPortfolios(): Flow<List<Portfolio>> = callbackFlow {
+        val userId = auth.currentUser?.uid ?: run {
+            trySend(listOf(Portfolio(id = "default", name = "Main Portfolio", isDefault = true)))
+            return@callbackFlow
         }
+        
+        val listener = firestore.collection("users").document(userId).collection("portfolios")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(listOf(Portfolio(id = "default", name = "Main Portfolio", isDefault = true)))
+                    return@addSnapshotListener
+                }
+                
+                if (snapshot != null) {
+                    val portfolios = snapshot.toObjects(Portfolio::class.java).toMutableList()
+                    if (portfolios.none { it.id == "default" }) {
+                        portfolios.add(Portfolio(id = "default", name = "Main Portfolio", isDefault = true))
+                    }
+                    // Sort: Default first, then by creation date ascending (newer at bottom)
+                    trySend(portfolios.sortedWith(compareByDescending<Portfolio> { it.isDefault }.thenBy { it.createdAt }))
+                }
+            }
+        awaitClose { listener.remove() }
     }
 
     suspend fun createPortfolio(name: String, initialBalance: Double): Result<Portfolio> {
@@ -1033,6 +1043,43 @@ class MarketRepository @Inject constructor(
             val portfolio = Portfolio(id = docRef.id, name = name, isDefault = false, balance = initialBalance)
             docRef.set(portfolio).await()
             Result.success(portfolio)
+        } catch (e: Exception) {
+            recordError(e)
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deletePortfolio(portfolioId: String): Result<Unit> {
+        val userId = auth.currentUser?.uid ?: return Result.failure(Exception("Not logged in"))
+        if (portfolioId == "default") return Result.failure(Exception("Cannot delete primary portfolio"))
+        
+        return try {
+            // Delete the portfolio document itself
+            firestore.collection("users").document(userId).collection("portfolios").document(portfolioId).delete().await()
+            
+            // Note: In a real app, you'd also delete the 'holdings' and 'history' sub-collections.
+            // Firestore doesn't delete sub-collections automatically when a parent is deleted.
+            // For this sim, we'll assume the parent doc deletion is enough for UI removal.
+            
+            if (_currentPortfolioId.value == portfolioId) {
+                _currentPortfolioId.value = "default"
+            }
+            
+            Result.success(Unit)
+        } catch (e: Exception) {
+            recordError(e)
+            Result.failure(e)
+        }
+    }
+
+    suspend fun renamePortfolio(portfolioId: String, newName: String): Result<Unit> {
+        val userId = auth.currentUser?.uid ?: return Result.failure(Exception("Not logged in"))
+        if (portfolioId == "default") return Result.failure(Exception("Cannot rename primary portfolio"))
+        
+        return try {
+            firestore.collection("users").document(userId).collection("portfolios").document(portfolioId)
+                .update("name", newName).await()
+            Result.success(Unit)
         } catch (e: Exception) {
             recordError(e)
             Result.failure(e)
@@ -1194,9 +1241,9 @@ class MarketRepository @Inject constructor(
     }
 
     suspend fun getTotalPortfoliosValue(): Double {
-        val portfolios = getPortfolios()
+        val portfoliosList = getPortfolios().first()
         var total = 0.0
-        portfolios.forEach { portfolio ->
+        portfoliosList.forEach { portfolio ->
             val holdings = getPortfolioWithQuotes(forceRefresh = false, portfolioId = portfolio.id)
             total += holdings.sumOf { it.first.price * it.second }
         }

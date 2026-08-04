@@ -126,10 +126,17 @@ fun CreatePortfolioScreen(
                         if (pagerState.currentPage == 0) {
                             scope.launch { pagerState.animateScrollToPage(1) }
                         } else {
-                            if (portfolioName.isNotBlank()) {
+                            if (portfolioName.isNotBlank() && !isLoading) {
                                 isLoading = true
-                                viewModel.createPortfolio(portfolioName, selectedLevel.amount)
-                                navController.popBackStack()
+                                scope.launch {
+                                    val result = viewModel.createPortfolio(portfolioName, selectedLevel.amount)
+                                    if (result.isSuccess) {
+                                        navController.popBackStack()
+                                    } else {
+                                        isLoading = false
+                                        // Could show a snackbar here if we had host state
+                                    }
+                                }
                             }
                         }
                     },

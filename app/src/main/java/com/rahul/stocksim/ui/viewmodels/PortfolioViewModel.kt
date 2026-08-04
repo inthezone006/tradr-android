@@ -54,7 +54,9 @@ class PortfolioViewModel @Inject constructor(
 
     fun loadPortfolios() {
         viewModelScope.launch {
-            _portfolios.value = marketRepository.getPortfolios()
+            marketRepository.getPortfolios().collect {
+                _portfolios.value = it
+            }
         }
     }
 
@@ -63,13 +65,26 @@ class PortfolioViewModel @Inject constructor(
         loadData(true)
     }
 
-    fun createPortfolio(name: String, initialBalance: Double) {
+    suspend fun createPortfolio(name: String, initialBalance: Double): Result<Portfolio> {
+        val result = marketRepository.createPortfolio(name, initialBalance)
+        if (result.isSuccess) {
+            marketRepository.selectPortfolio(result.getOrThrow().id)
+        }
+        return result
+    }
+
+    fun deletePortfolio(portfolioId: String) {
         viewModelScope.launch {
-            val result = marketRepository.createPortfolio(name, initialBalance)
+            val result = marketRepository.deletePortfolio(portfolioId)
             if (result.isSuccess) {
                 loadPortfolios()
-                selectPortfolio(result.getOrThrow().id)
             }
+        }
+    }
+
+    fun renamePortfolio(portfolioId: String, newName: String) {
+        viewModelScope.launch {
+            marketRepository.renamePortfolio(portfolioId, newName)
         }
     }
 

@@ -184,56 +184,63 @@ fun ProRecommendationsContent(recommendations: String?) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
-            .padding(20.dp)
+            .padding(vertical = 12.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            shape = RoundedCornerShape(16.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White)
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = "AI Market Analysis",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
+            Column(modifier = Modifier.padding(20.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "AI Market Analysis",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
+                    
+                    Surface(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "PRO",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(20.dp))
+                
+                if (recommendations == null) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().height(200.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(32.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Gemini is analyzing the market...", color = Color.Gray, fontSize = 14.sp)
+                    }
+                } else {
+                    MarkdownText(
+                        markdown = recommendations,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
-            
-            Surface(
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(
-                    text = "PRO",
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(20.dp))
-        
-        if (recommendations == null) {
-            Column(
-                modifier = Modifier.fillMaxWidth().height(200.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(32.dp))
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Gemini is analyzing the market...", color = Color.Gray, fontSize = 14.sp)
-            }
-        } else {
-            MarkdownText(
-                markdown = recommendations,
-                modifier = Modifier.fillMaxWidth()
-            )
         }
     }
 }
