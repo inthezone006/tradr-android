@@ -184,8 +184,7 @@ fun ProRecommendationsContent(recommendations: String?) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
             .padding(20.dp)
     ) {
         Row(
@@ -194,7 +193,7 @@ fun ProRecommendationsContent(recommendations: String?) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color(0xFFFFD700))
+                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White)
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = "AI Market Analysis",
@@ -205,12 +204,12 @@ fun ProRecommendationsContent(recommendations: String?) {
             }
             
             Surface(
-                color = Color(0xFFFFD700).copy(alpha = 0.1f),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
                     text = "PRO",
-                    color = Color(0xFFFFD700),
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -231,36 +230,11 @@ fun ProRecommendationsContent(recommendations: String?) {
                 Text("Gemini is analyzing the market...", color = Color.Gray, fontSize = 14.sp)
             }
         } else {
-            // Split the text by numbers if it follows a numbered list format from the prompt
-            val sections = recommendations.split(Regex("(?=\\d\\.)"))
-            
-            sections.forEach { section ->
-                if (section.isNotBlank()) {
-                    Card(
-                        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.05f)),
-                        shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = section.trim(),
-                            color = Color.White.copy(alpha = 0.9f),
-                            lineHeight = 22.sp,
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(12.dp)
-                        )
-                    }
-                }
-            }
+            MarkdownText(
+                markdown = recommendations,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = "Powered by Google Gemini. Recommendations are for informational purposes only.",
-            fontSize = 11.sp,
-            color = Color.Gray,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 }
 

@@ -6,10 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.rahul.stocksim.data.*
 import com.rahul.stocksim.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class PortfolioViewModel @Inject constructor(
     private val marketRepository: MarketRepository,
@@ -27,7 +29,9 @@ class PortfolioViewModel @Inject constructor(
 
     val selectedPortfolioId: StateFlow<String> = marketRepository.currentPortfolioId
 
-    val userBalance: Flow<Double> = marketRepository.getUserBalance()
+    val userBalance: Flow<Double> = selectedPortfolioId.flatMapLatest { id ->
+        marketRepository.getUserBalance(id)
+    }
 
     private val _contracts = MutableStateFlow<List<TradeContract>>(emptyList())
     val contracts: StateFlow<List<TradeContract>> = _contracts.asStateFlow()
@@ -59,9 +63,9 @@ class PortfolioViewModel @Inject constructor(
         loadData(true)
     }
 
-    fun createPortfolio(name: String) {
+    fun createPortfolio(name: String, initialBalance: Double) {
         viewModelScope.launch {
-            val result = marketRepository.createPortfolio(name)
+            val result = marketRepository.createPortfolio(name, initialBalance)
             if (result.isSuccess) {
                 loadPortfolios()
                 selectPortfolio(result.getOrThrow().id)
@@ -119,7 +123,9 @@ class PortfolioViewModel @Inject constructor(
 
     fun loadHistory() {
         viewModelScope.launch {
-            marketRepository.getPortfolioHistory().collect {
+            marketRepository.currentPortfolioId.flatMapLatest { id ->
+                marketRepository.getPortfolioHistory(id)
+            }.collect {
                 _portfolioHistory.value = it
             }
         }

@@ -49,6 +49,7 @@ sealed class Screen(val route: String) {
     }
     object Achievements : Screen("achievements")
     object MarketTutorial : Screen("market_tutorial")
+    object CreatePortfolio : Screen("create_portfolio_screen")
 }
 
 sealed class BottomNavItem(val route: String, val label: String, val icon: ImageVector) {

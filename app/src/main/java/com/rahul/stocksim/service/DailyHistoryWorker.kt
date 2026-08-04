@@ -24,9 +24,10 @@ class DailyHistoryWorker @AssistedInject constructor(
         try {
             val userId = repository.getCurrentUserId() ?: return@withContext Result.success()
             
-            // Calculate total account value
-            val balance = repository.getUserBalance().first()
-            val totalStockValue = repository.getTotalPortfoliosValue()
+            // Calculate total account value (Primary portfolio only for leaderboard/history)
+            val balance = repository.getUserBalance("default").first()
+            val primaryPortfolio = repository.getPortfolioWithQuotes(forceRefresh = true, portfolioId = "default")
+            val totalStockValue = primaryPortfolio.sumOf { it.first.price * it.second }
             val totalAccountValue = balance + totalStockValue
 
             if (totalAccountValue > 0) {

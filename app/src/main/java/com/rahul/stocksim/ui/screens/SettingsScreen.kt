@@ -140,22 +140,9 @@ fun SettingsScreen(
                     SettingsItem(
                         icon = Icons.Default.Star,
                         label = "Membership",
-                        value = if (isPro) "Tradr Pro active" else "Upgrade to Pro",
-                        onClick = { navController.navigate(Screen.Upgrade.route) },
-                        trailing = {
+                        value = if (isPro) "tradr pro active" else "Upgrade to Pro",
+                        onClick = { 
                             if (isPro) {
-                                Icon(Icons.Default.Verified, contentDescription = "Pro", tint = Color(0xFFFFD700))
-                            } else {
-                                Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = Color.Gray)
-                            }
-                        }
-                    )
-                    if (isPro) {
-                        SettingsItem(
-                            icon = Icons.Default.History,
-                            label = "Membership",
-                            value = "View purchase history",
-                            onClick = {
                                 val intent = Intent(Intent.ACTION_VIEW).apply {
                                     data = Uri.parse("https://play.google.com/store/account/orderhistory")
                                     setPackage("com.android.vending")
@@ -166,9 +153,18 @@ fun SettingsScreen(
                                     val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/account/orderhistory"))
                                     context.startActivity(webIntent)
                                 }
+                            } else {
+                                navController.navigate(Screen.Upgrade.route) 
                             }
-                        )
-                    }
+                        },
+                        trailing = {
+                            if (isPro) {
+                                Icon(Icons.Default.Verified, contentDescription = "Pro", tint = Color(0xFFFFD700))
+                            } else {
+                                Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = Color.Gray)
+                            }
+                        }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

@@ -69,41 +69,81 @@ fun PortfolioScreen(
     val isPro by viewModel.isPro.collectAsState()
     
     var showAiSheet by remember { mutableStateOf(false) }
-    var showCreatePortfolioDialog by remember { mutableStateOf(false) }
-    var newPortfolioName by remember { mutableStateOf("") }
+    var showPortfolioSelector by remember { mutableStateOf(false) }
 
-    if (showCreatePortfolioDialog) {
-        AlertDialog(
-            onDismissRequest = { showCreatePortfolioDialog = false },
-            title = { Text("Create Portfolio") },
-            text = {
-                TextField(
-                    value = newPortfolioName,
-                    onValueChange = { newPortfolioName = it },
-                    placeholder = { Text("Portfolio Name") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+    if (showPortfolioSelector) {
+        ModalBottomSheet(
+            onDismissRequest = { showPortfolioSelector = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = Color.White
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                Text(
+                    text = "Select Portfolio",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (newPortfolioName.isNotBlank()) {
-                            viewModel.createPortfolio(newPortfolioName)
-                            newPortfolioName = ""
-                            showCreatePortfolioDialog = false
+                
+                portfolios.forEach { portfolio ->
+                    val isSelected = portfolio.id == selectedPortfolioId
+                    Surface(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            viewModel.selectPortfolio(portfolio.id)
+                            showPortfolioSelector = false
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = if (isSelected) Color.White.copy(alpha = 0.1f) else Color.Transparent,
+                        border = if (isSelected) BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)) else null
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = portfolio.name,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    color = Color.White
+                                )
+                                if (portfolio.isDefault) {
+                                    Text("Primary Account", color = Color.Gray, fontSize = 11.sp)
+                                }
+                            }
+                            if (isSelected) {
+                                Icon(Icons.Default.Check, contentDescription = null, tint = Color.White)
+                            }
                         }
                     }
-                ) {
-                    Text("CREATE")
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showCreatePortfolioDialog = false }) {
-                    Text("CANCEL")
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                if (isPro) {
+                    FilledTonalButton(
+                        onClick = {
+                            showPortfolioSelector = false
+                            navController.navigate(Screen.CreatePortfolio.route)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Create New Portfolio")
+                    }
                 }
             }
-        )
+        }
     }
 
     Box(
@@ -146,48 +186,29 @@ fun PortfolioScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            modifier = Modifier.padding(bottom = 16.dp)
                         ) {
-                            Text(
-                                text = "Portfolio",
-                                color = Color.White,
-                                style = MaterialTheme.typography.displayLarge,
-                                modifier = Modifier.weight(1f)
-                            )
-                            if (isPro) {
-                                IconButton(onClick = { showCreatePortfolioDialog = true }) {
-                                    Icon(Icons.Default.Add, contentDescription = "Add Portfolio", tint = Color.White)
-                                }
+                            val selectedName = portfolios.find { it.id == selectedPortfolioId }?.name ?: "Portfolio"
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Portfolio",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.displayLarge
+                                )
                             }
-                        }
-                        
-                        if (portfolios.size > 1) {
-                            ScrollableTabRow(
-                                selectedTabIndex = portfolios.indexOfFirst { it.id == selectedPortfolioId },
-                                containerColor = Color.Transparent,
-                                contentColor = Color.White,
-                                edgePadding = 0.dp,
-                                divider = {},
-                                indicator = { tabPositions ->
-                                    val index = portfolios.indexOfFirst { it.id == selectedPortfolioId }.coerceAtLeast(0)
-                                    TabRowDefaults.SecondaryIndicator(
-                                        modifier = Modifier.tabIndicatorOffset(tabPositions[index]),
-                                        color = Color.White
-                                    )
-                                }
+                            
+                            FilledTonalButton(
+                                onClick = { showPortfolioSelector = true },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = Color.White.copy(alpha = 0.05f),
+                                    contentColor = Color.White
+                                )
                             ) {
-                                portfolios.forEach { portfolio ->
-                                    Tab(
-                                        selected = selectedPortfolioId == portfolio.id,
-                                        onClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            viewModel.selectPortfolio(portfolio.id)
-                                        },
-                                        text = { Text(portfolio.name) }
-                                    )
-                                }
+                                Text(selectedName, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(16.dp))
                             }
-                            Spacer(modifier = Modifier.height(16.dp))
                         }
                         
                         // Enhanced Fintech Header with Deep Insights

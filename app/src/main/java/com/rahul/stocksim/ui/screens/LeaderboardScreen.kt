@@ -311,10 +311,6 @@ fun LeaderCard(rank: Int, user: LeaderboardUser, isCurrentUser: Boolean) {
                             modifier = Modifier.size(16.dp)
                         )
                     }
-                    if (isCurrentUser) {
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = "👑", fontSize = 14.sp)
-                    }
                 }
                 Text(text = "Level ${user.level}", color = Color.Gray, fontSize = 12.sp)
             }

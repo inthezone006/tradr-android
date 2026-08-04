@@ -321,6 +321,9 @@ class MainActivity : ComponentActivity() {
                                 onDismiss = { navController.popBackStack() }
                             )
                         }
+                        composable(Screen.CreatePortfolio.route) {
+                            CreatePortfolioScreen(navController = navController)
+                        }
                     }
                 }
             }

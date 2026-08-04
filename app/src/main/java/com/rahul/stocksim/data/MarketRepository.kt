@@ -1022,7 +1022,7 @@ class MarketRepository @Inject constructor(
         }
     }
 
-    suspend fun createPortfolio(name: String): Result<Portfolio> {
+    suspend fun createPortfolio(name: String, initialBalance: Double): Result<Portfolio> {
         val userId = auth.currentUser?.uid ?: return Result.failure(Exception("Not logged in"))
         if (!billingRepository.isPro.value) {
             return Result.failure(Exception("Upgrade to Pro to create multiple portfolios!"))
@@ -1030,7 +1030,7 @@ class MarketRepository @Inject constructor(
         
         return try {
             val docRef = firestore.collection("users").document(userId).collection("portfolios").document()
-            val portfolio = Portfolio(id = docRef.id, name = name, isDefault = false)
+            val portfolio = Portfolio(id = docRef.id, name = name, isDefault = false, balance = initialBalance)
             docRef.set(portfolio).await()
             Result.success(portfolio)
         } catch (e: Exception) {
@@ -1050,13 +1050,19 @@ class MarketRepository @Inject constructor(
             } else {
                 userRef.collection("portfolios").document(portfolioId).collection("holdings").document(symbol)
             }
+            
+            val balanceRef = if (portfolioId == "default") {
+                userRef
+            } else {
+                userRef.collection("portfolios").document(portfolioId)
+            }
 
             firestore.runTransaction { transaction ->
-                val currentBalance = (transaction.get(userRef).get("balance") as? Number)?.toDouble() ?: 0.0
+                val currentBalance = (transaction.get(balanceRef).get("balance") as? Number)?.toDouble() ?: 0.0
                 val portfolioDoc = transaction.get(portfolioRef)
                 if (currentBalance >= totalCost) {
                     newBalance = currentBalance - totalCost
-                    transaction.update(userRef, "balance", newBalance)
+                    transaction.update(balanceRef, "balance", newBalance)
                     if (portfolioDoc.exists()) {
                         transaction.update(portfolioRef, "quantity", ((portfolioDoc.get("quantity") as? Number)?.toLong() ?: 0L) + quantity)
                     } else {
@@ -1139,6 +1145,12 @@ class MarketRepository @Inject constructor(
                 userRef.collection("portfolios").document(portfolioId).collection("holdings").document(symbol)
             }
             
+            val balanceRef = if (portfolioId == "default") {
+                userRef
+            } else {
+                userRef.collection("portfolios").document(portfolioId)
+            }
+            
             var resultDays = -1L
             var resultInstantSell = false
             var newBalance = 0.0
@@ -1149,9 +1161,9 @@ class MarketRepository @Inject constructor(
                 val purchaseDate = portfolioDoc.getTimestamp("purchaseDate")
                 
                 if (currentQty >= quantity) {
-                    val currentBalance = (transaction.get(userRef).get("balance") as? Number)?.toDouble() ?: 0.0
+                    val currentBalance = (transaction.get(balanceRef).get("balance") as? Number)?.toDouble() ?: 0.0
                     newBalance = currentBalance + totalGain
-                    transaction.update(userRef, "balance", newBalance)
+                    transaction.update(balanceRef, "balance", newBalance)
                     transaction.update(portfolioRef, "quantity", currentQty - quantity)
                     
                     purchaseDate?.let { date ->
@@ -1348,14 +1360,20 @@ class MarketRepository @Inject constructor(
         } ?: emptyList()
     }
 
-    fun getUserBalance(): Flow<Double> = callbackFlow {
+    fun getUserBalance(portfolioId: String = "default"): Flow<Double> = callbackFlow {
         val userId = auth.currentUser?.uid ?: run {
             trySend(0.0)
             close()
             return@callbackFlow
         }
-        val listener = firestore.collection("users").document(userId)
-            .addSnapshotListener { snapshot, error ->
+        
+        val docRef = if (portfolioId == "default") {
+            firestore.collection("users").document(userId)
+        } else {
+            firestore.collection("users").document(userId).collection("portfolios").document(portfolioId)
+        }
+
+        val listener = docRef.addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     trySend(0.0)
                     recordError(error)
@@ -1388,9 +1406,13 @@ class MarketRepository @Inject constructor(
         } catch (e: Exception) { recordError(e); Result.failure(e) }
     }
 
-    suspend fun saveAccountValueHistory(userId: String, value: Double) {
+    suspend fun saveAccountValueHistory(userId: String, value: Double, portfolioId: String = "default") {
         try {
-            val historyRef = firestore.collection("users").document(userId).collection("account_history")
+            val historyRef = if (portfolioId == "default") {
+                firestore.collection("users").document(userId).collection("account_history")
+            } else {
+                firestore.collection("users").document(userId).collection("portfolios").document(portfolioId).collection("history")
+            }
             val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             
             // 1. Get existing history to handle the backfilling logic
@@ -1413,7 +1435,7 @@ class MarketRepository @Inject constructor(
                     calendar.add(Calendar.DAY_OF_YEAR, -1)
                 }
                 batch.commit().await()
-                Log.d("MarketRepository", "Initial 30-day backfill completed for user $userId")
+                Log.d("MarketRepository", "Initial 30-day backfill completed for $portfolioId")
             } else {
                 // Regular Daily Update
                 val today = sdf.format(Date())
@@ -1437,19 +1459,23 @@ class MarketRepository @Inject constructor(
         }
     }
 
-    fun getAccountValueHistory(): Flow<List<Pair<Long, Double>>> = flow {
+    fun getAccountValueHistory(portfolioId: String = "default"): Flow<List<Pair<Long, Double>>> = flow {
         val userId = auth.currentUser?.uid ?: return@flow
         
-        var snapshot = firestore.collection("users").document(userId)
-            .collection("account_history")
+        val historyRef = if (portfolioId == "default") {
+            firestore.collection("users").document(userId).collection("account_history")
+        } else {
+            firestore.collection("users").document(userId).collection("portfolios").document(portfolioId).collection("history")
+        }
+
+        var snapshot = historyRef
             .orderBy("timestamp")
             .get().await()
         
         if (snapshot.isEmpty) {
-            val balance = getUserBalance().first()
-            saveAccountValueHistory(userId, balance)
-            snapshot = firestore.collection("users").document(userId)
-                .collection("account_history")
+            val balance = getUserBalance(portfolioId).first()
+            saveAccountValueHistory(userId, balance, portfolioId)
+            snapshot = historyRef
                 .orderBy("timestamp")
                 .get().await()
         }
@@ -1465,7 +1491,7 @@ class MarketRepository @Inject constructor(
         emit(emptyList())
     }
 
-    fun getPortfolioHistory(): Flow<List<StockPricePoint>> = getAccountValueHistory().map { points ->
+    fun getPortfolioHistory(portfolioId: String = "default"): Flow<List<StockPricePoint>> = getAccountValueHistory(portfolioId).map { points ->
         points.map { StockPricePoint(it.first / 1000, it.second) }
     }
 

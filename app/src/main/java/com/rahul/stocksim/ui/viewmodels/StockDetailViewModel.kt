@@ -9,6 +9,7 @@ import com.rahul.stocksim.data.*
 import com.rahul.stocksim.data.local.entity.PriceAlertEntity
 import com.rahul.stocksim.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -17,6 +18,7 @@ import java.util.Calendar
 import java.util.Locale
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class StockDetailViewModel @Inject constructor(
     private val marketRepository: MarketRepository,
@@ -60,6 +62,10 @@ class StockDetailViewModel @Inject constructor(
     
     val isPro = billingRepository.isPro
 
+    val userBalance: Flow<Double> = marketRepository.currentPortfolioId.flatMapLatest { id ->
+        marketRepository.getUserBalance(id)
+    }
+
     init {
         symbol?.let { stockSymbol ->
             viewModelScope.launch {
@@ -78,8 +84,6 @@ class StockDetailViewModel @Inject constructor(
         val macd: TwelveDataMACDValue?,
         val bbands: TwelveDataBBandsValue?
     )
-
-    val userBalance: Flow<Double> = marketRepository.getUserBalance()
 
     init {
         val stockSymbol = symbol
