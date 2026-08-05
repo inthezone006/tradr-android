@@ -43,6 +43,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.rahul.stocksim.ui.viewmodels.PortfolioViewModel
 import com.rahul.stocksim.ui.viewmodels.MarketViewModel
 import com.rahul.stocksim.ui.viewmodels.InsightsViewModel
+import com.rahul.stocksim.ui.viewmodels.AuthViewModel
 import com.rahul.stocksim.ui.viewmodels.PortfolioUiState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.rahul.stocksim.model.Stock
@@ -60,7 +61,8 @@ fun MainScreen(
     mainNavController: NavController, 
     onStockClick: (Stock) -> Unit,
     portfolioViewModel: PortfolioViewModel = hiltViewModel(),
-    marketViewModel: MarketViewModel = hiltViewModel()
+    marketViewModel: MarketViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
     val bottomNavController = rememberNavController()
     val context = LocalContext.current
@@ -78,8 +80,8 @@ fun MainScreen(
         BottomNavItem.Guide
     )
     
-    val authRepository = remember { AuthRepository() }
-    val user = authRepository.currentUser
+    val authRepository = authViewModel.repository
+    val user = authViewModel.currentUser
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
 

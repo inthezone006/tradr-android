@@ -31,7 +31,19 @@ interface StockDao {
     suspend fun insertStocks(stocks: List<StockEntity>): List<Long>
 
     @Query("DELETE FROM stocks")
-    suspend fun clearAll(): Int
+    suspend fun clearAllStocks(): Int
+
+    @Query("DELETE FROM achievements")
+    suspend fun clearAchievements(): Int
+
+    @Query("DELETE FROM price_alerts")
+    suspend fun clearPriceAlerts(): Int
+
+    @Transaction
+    suspend fun clearUserData() {
+        clearAchievements()
+        clearPriceAlerts()
+    }
 
     @Query("SELECT * FROM price_alerts WHERE isEnabled = 1")
     suspend fun getActivePriceAlerts(): List<PriceAlertEntity>

@@ -48,7 +48,6 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val authRepository = AuthRepository() // Still used for some direct calls if needed, but better to move to VM
     
     val isPro by viewModel.isPro.collectAsState()
     
@@ -61,8 +60,8 @@ fun SettingsScreen(
 
     val loadData: suspend () -> Unit = {
         try {
-            user?.reload()?.await()
-            user = authRepository.currentUser
+            viewModel.currentUser?.reload()?.await()
+            user = viewModel.currentUser
             displayName = user?.displayName ?: ""
             profilePhotoUrl = user?.photoUrl
         } catch (e: Exception) {
@@ -185,13 +184,23 @@ fun SettingsScreen(
                             if (user?.isEmailVerified == true) {
                                 Icon(Icons.Default.Verified, contentDescription = "Verified", tint = Color.Green, modifier = Modifier.size(20.dp))
                             } else {
-                                TextButton(onClick = {
-                                    coroutineScope.launch {
-                                        authRepository.sendEmailVerification()
-                                        Toast.makeText(context, "Verification email sent!", Toast.LENGTH_SHORT).show()
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    TextButton(onClick = {
+                                        coroutineScope.launch {
+                                            viewModel.sendEmailVerification()
+                                            Toast.makeText(context, "Verification email sent!", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }) {
+                                        Text("Verify", color = Color.White, fontSize = 12.sp)
                                     }
-                                }) {
-                                    Text("Verify Now", color = Color.White, fontSize = 12.sp)
+                                    IconButton(onClick = {
+                                        coroutineScope.launch {
+                                            isRefreshing = true
+                                            loadData()
+                                        }
+                                    }) {
+                                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = Color.Gray, modifier = Modifier.size(16.dp))
+                                    }
                                 }
                             }
                         }
@@ -261,7 +270,7 @@ fun SettingsScreen(
 
                 Button(
                     onClick = {
-                        authRepository.logout()
+                        viewModel.logout()
                         navController.navigate(Screen.Login.createRoute()) {
                             popUpTo(Screen.Main.route) { inclusive = true }
                         }

@@ -3,31 +3,36 @@ package com.rahul.stocksim.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rahul.stocksim.data.AuthRepository
-import com.rahul.stocksim.data.BillingRepository
 import com.rahul.stocksim.data.MarketRepository
+import com.rahul.stocksim.data.BillingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(
+class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val billingRepository: BillingRepository,
-    private val marketRepository: MarketRepository
+    private val marketRepository: MarketRepository,
+    private val billingRepository: BillingRepository
 ) : ViewModel() {
-    val isPro: StateFlow<Boolean> = billingRepository.isPro
-    val currentUser = authRepository.currentUser
-    
+
+    val repository = authRepository
+    val currentUser get() = authRepository.currentUser
+
+    suspend fun reloadUser() = authRepository.reloadUser()
+
+    fun clearState() {
+        viewModelScope.launch {
+            marketRepository.clearCaches()
+            billingRepository.clear()
+        }
+    }
+
     fun logout() {
         viewModelScope.launch {
             marketRepository.clearCaches()
             billingRepository.clear()
             authRepository.logout()
         }
-    }
-    
-    suspend fun sendEmailVerification() {
-        authRepository.sendEmailVerification()
     }
 }

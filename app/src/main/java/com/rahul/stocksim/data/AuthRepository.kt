@@ -15,10 +15,13 @@ import com.google.firebase.crashlytics.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.storage.FirebaseStorage
+import com.rahul.stocksim.BuildConfig
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.CancellationException
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
+import javax.inject.Singleton
 
 data class NotificationSettings(
     val masterEnabled: Boolean = true,
@@ -28,7 +31,8 @@ data class NotificationSettings(
     val notifyNewSignIn: Boolean = true
 )
 
-class AuthRepository {
+@Singleton
+class AuthRepository @Inject constructor() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val storage = FirebaseStorage.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
@@ -163,6 +167,16 @@ class AuthRepository {
             currentUser?.sendEmailVerification()?.await()
             logEventWithUser("send_email_verification")
             Result.success(Unit)
+        } catch (e: Exception) {
+            recordError(e)
+            Result.failure(e)
+        }
+    }
+
+    suspend fun reloadUser(): Result<FirebaseUser?> {
+        return try {
+            currentUser?.reload()?.await()
+            Result.success(currentUser)
         } catch (e: Exception) {
             recordError(e)
             Result.failure(e)
@@ -347,6 +361,7 @@ class AuthRepository {
     }
 
     suspend fun isProUser(): Boolean {
+        if (BuildConfig.DEBUG) return true
         val user = auth.currentUser ?: return false
         return try {
             val snapshot = firestore.collection("users").document(user.uid).get().await()

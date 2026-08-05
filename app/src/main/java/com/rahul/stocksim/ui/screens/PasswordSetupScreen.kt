@@ -18,9 +18,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.rahul.stocksim.data.AuthRepository
 import com.rahul.stocksim.ui.components.ModernTextField
 import com.rahul.stocksim.ui.components.PillButton
+import com.rahul.stocksim.ui.viewmodels.AuthViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,9 +31,10 @@ fun PasswordSetupScreen(
     navController: NavController, 
     isChangePassword: Boolean = false,
     initialName: String? = null,
-    initialEmail: String? = null
+    initialEmail: String? = null,
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
-    val authRepository = AuthRepository()
+    val authRepository = viewModel.repository
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 

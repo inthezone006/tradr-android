@@ -7,6 +7,7 @@ import com.android.billingclient.api.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.rahul.stocksim.BuildConfig
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,7 +30,7 @@ class BillingRepository @Inject constructor(
         .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
         .build()
 
-    private val _isPro = MutableStateFlow(false)
+    private val _isPro = MutableStateFlow(BuildConfig.DEBUG)
     val isPro = _isPro.asStateFlow()
 
     private val _purchaseStatus = MutableStateFlow<PurchaseStatus>(PurchaseStatus.Idle)
@@ -67,6 +68,10 @@ class BillingRepository @Inject constructor(
     }
 
     private fun queryPurchases() {
+        if (BuildConfig.DEBUG) {
+            _isPro.value = true
+            return
+        }
         val params = QueryPurchasesParams.newBuilder()
             .setProductType(BillingClient.ProductType.INAPP)
             .build()
@@ -187,6 +192,10 @@ class BillingRepository @Inject constructor(
     }
     
     suspend fun refreshProStatus(): Boolean {
+        if (BuildConfig.DEBUG) {
+            _isPro.value = true
+            return true
+        }
         val user = auth.currentUser ?: return false
         return try {
             val snapshot = firestore.collection("users").document(user.uid).get().await()
@@ -196,5 +205,11 @@ class BillingRepository @Inject constructor(
         } catch (e: Exception) {
             false
         }
+    }
+
+    fun clear() {
+        _isPro.value = BuildConfig.DEBUG
+        _purchaseStatus.value = PurchaseStatus.Idle
+        Log.d("BillingRepository", "Billing state cleared for logout")
     }
 }

@@ -358,6 +358,20 @@ class MarketRepository @Inject constructor(
     private var lastRequestTime = 0L
     private val MIN_DELAY_MS = 100L
 
+    suspend fun clearCaches() {
+        quoteCache.clear()
+        genericCache.clear()
+        fullDetailCache.clear()
+        globalWatchlistCache = null
+        globalPortfolioCache = null
+        cachedMarketInsights = null
+        industryCache.clear()
+        logoCache.clear()
+        _currentPortfolioId.value = "default"
+        stockDao.clearUserData()
+        Log.d("MarketRepository", "All market caches cleared for logout")
+    }
+
     companion object {
         private var globalWatchlistCache: List<Stock>? = null
         private var globalPortfolioCache: List<Pair<Stock, Long>>? = null

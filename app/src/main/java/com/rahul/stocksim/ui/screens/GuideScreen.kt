@@ -34,16 +34,21 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.rahul.stocksim.data.AuthRepository
+import com.rahul.stocksim.ui.viewmodels.AuthViewModel
 import com.rahul.stocksim.ui.theme.DarkGrayBlack
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun GuideScreen(navController: NavController) {
+fun GuideScreen(
+    navController: NavController,
+    viewModel: AuthViewModel = hiltViewModel()
+) {
     val haptic = LocalHapticFeedback.current
-    val authRepository = remember { AuthRepository() }
+    val authRepository = viewModel.repository
     var isTutorialCompleted by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {

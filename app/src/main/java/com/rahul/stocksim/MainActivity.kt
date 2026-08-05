@@ -38,6 +38,7 @@ import com.rahul.stocksim.service.PriceAlertWorker
 import com.rahul.stocksim.service.DailyHistoryWorker
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -116,6 +117,11 @@ class MainActivity : ComponentActivity() {
 
             LaunchedEffect(Unit) {
                 if (auth.currentUser != null) {
+                    try {
+                        auth.currentUser?.reload()?.await()
+                    } catch (e: Exception) {
+                        Log.e("MainActivity", "User reload failed", e)
+                    }
                     val hasProfile = authRepository.isProfileCreated()
                     if (!hasProfile) {
                         Log.w("MainActivity", "User authenticated but profile missing. Signing out for safety.")

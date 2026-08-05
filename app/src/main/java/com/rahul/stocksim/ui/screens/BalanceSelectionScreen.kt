@@ -21,9 +21,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.rahul.stocksim.data.AuthRepository
 import com.rahul.stocksim.ui.components.PillButton
 import com.rahul.stocksim.ui.theme.RichBlack
+import com.rahul.stocksim.ui.viewmodels.AuthViewModel
 import kotlinx.coroutines.launch
 
 data class BalanceLevel(val level: Int, val amount: Double, val label: String)
@@ -34,9 +36,10 @@ fun BalanceSelectionScreen(
     navController: NavController,
     name: String? = null,
     email: String? = null,
-    password: String? = null
+    password: String? = null,
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
-    val authRepository = AuthRepository()
+    val authRepository = viewModel.repository
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     

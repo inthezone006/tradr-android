@@ -31,12 +31,14 @@ import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.navigation.NavController
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.rahul.stocksim.R
 import com.rahul.stocksim.data.AuthRepository
 import com.rahul.stocksim.ui.components.ModernTextField
 import com.rahul.stocksim.ui.components.PillButton
+import com.rahul.stocksim.ui.viewmodels.AuthViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -50,8 +52,11 @@ private fun Context.findActivity(): Activity? {
 }
 
 @Composable
-fun RegisterScreen(navController: NavController) {
-    val authRepository = AuthRepository()
+fun RegisterScreen(
+    navController: NavController,
+    viewModel: AuthViewModel = hiltViewModel()
+) {
+    val authRepository = viewModel.repository
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -171,6 +176,7 @@ fun RegisterScreen(navController: NavController) {
                                     if (exists) {
                                         snackbarHostState.showSnackbar("This email is already in use.")
                                     } else {
+                                        viewModel.clearState()
                                         navController.navigate(Screen.PasswordSetup.createRoute(false, name, email))
                                     }
                                 }
@@ -196,6 +202,7 @@ fun RegisterScreen(navController: NavController) {
                                         val activity = context.findActivity() ?: return@launch
                                         val result = credentialManager.getCredential(request = request, context = activity)
                                         val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(result.credential.data)
+                                        viewModel.clearState()
                                         val signInResult = authRepository.signInWithGoogle(googleIdTokenCredential.idToken)
                                         signInResult.onSuccess { isNewUser ->
                                             val user = authRepository.currentUser

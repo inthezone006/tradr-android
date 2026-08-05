@@ -9,32 +9,42 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.rahul.stocksim.data.AuthRepository
+import com.rahul.stocksim.ui.theme.RichBlack
+import com.rahul.stocksim.ui.viewmodels.AuthViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun EditProfileScreen(navController: NavController) {
+fun EditProfileScreen(
+    navController: NavController,
+    viewModel: AuthViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val authRepository = AuthRepository()
-    val user = authRepository.currentUser
+    val authRepository = viewModel.repository
+    val user = viewModel.currentUser
     
     var name by remember { mutableStateOf(user?.displayName ?: "") }
     var isUpdatingName by remember { mutableStateOf(false) }
 
-    var showDeleteDialog by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showDeleteSheet by remember { mutableStateOf(false) }
     var isDeleting by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -155,8 +165,11 @@ fun EditProfileScreen(navController: NavController) {
                     )
                     
                     Button(
-                        onClick = { showDeleteDialog = true },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)),
+                        onClick = { showDeleteSheet = true },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFD32F2F),
+                            contentColor = Color.White
+                        ),
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp)
                     ) {
@@ -167,58 +180,92 @@ fun EditProfileScreen(navController: NavController) {
         }
     }
 
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { if (!isDeleting) showDeleteDialog = false },
-            containerColor = MaterialTheme.colorScheme.surface,
-            title = { Text("Permanently Delete Account?", color = Color.White) },
-            text = { 
+    if (showDeleteSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { if (!isDeleting) showDeleteSheet = false },
+            sheetState = sheetState,
+            containerColor = RichBlack,
+            dragHandle = { BottomSheetDefaults.DragHandle(color = Color.DarkGray) }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+                    .padding(bottom = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = Color(0xFFD32F2F),
+                    modifier = Modifier.size(48.dp)
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
                 Text(
-                    "Are you sure you want to delete your account? All your simulator data will be lost forever.",
-                    color = Color.Gray
-                ) 
-            },
-            confirmButton = {
-                TextButton(
+                    text = "Permanently Delete Account?",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Text(
+                    text = "Are you sure you want to delete your account? All your simulator data, balance, and progress will be lost forever. This action cannot be undone.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center
+                )
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                Button(
                     onClick = {
                         isDeleting = true
                         coroutineScope.launch {
                             val result = authRepository.deleteCurrentUser()
                             isDeleting = false
                             if (result.isSuccess) {
+                                showDeleteSheet = false
                                 Toast.makeText(context, "Account deleted successfully", Toast.LENGTH_SHORT).show()
                                 navController.navigate(Screen.Login.createRoute()) {
                                     popUpTo(0) { inclusive = true }
                                 }
                             } else {
                                 val error = result.exceptionOrNull()?.message ?: "Unknown error"
-                                if (error.contains("recent-login")) {
-                                    Toast.makeText(context, "Please log in again before deleting your account for security purposes.", Toast.LENGTH_LONG).show()
-                                    authRepository.logout()
-                                    navController.navigate(Screen.Login.createRoute()) {
-                                        popUpTo(0) { inclusive = true }
-                                    }
-                                } else {
-                                    Toast.makeText(context, "Deletion failed: $error", Toast.LENGTH_LONG).show()
-                                    showDeleteDialog = false
-                                }
+                                Toast.makeText(context, "Deletion failed: $error", Toast.LENGTH_LONG).show()
+                                showDeleteSheet = false
                             }
                         }
                     },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFD32F2F),
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(16.dp),
                     enabled = !isDeleting
                 ) {
                     if (isDeleting) {
-                        LoadingIndicator(modifier = Modifier.size(18.dp), color = Color.Red)
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
                     } else {
-                        Text("DELETE", color = Color.Red, fontWeight = FontWeight.Bold)
+                        Text("PERMANENTLY DELETE", fontWeight = FontWeight.Bold)
                     }
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }, enabled = !isDeleting) {
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                TextButton(
+                    onClick = { showDeleteSheet = false },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isDeleting
+                ) {
                     Text("CANCEL", color = Color.White)
                 }
             }
-        )
+        }
     }
 }
