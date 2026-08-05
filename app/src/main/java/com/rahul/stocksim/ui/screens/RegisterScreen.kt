@@ -194,13 +194,13 @@ fun RegisterScreen(navController: NavController) {
                                 
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Upgrade to Tradr Pro",
+                                        text = "Upgrade to tradr pro",
                                         fontWeight = FontWeight.Bold,
                                         color = Color.White,
                                         fontSize = 16.sp
                                     )
                                     Text(
-                                        text = "Unlock AI analysis & unlimited watchlist for $0.99",
+                                        text = "Unlock AI analysis, unlimited portfolios, and deeper insights for $0.99",
                                         color = Color.Gray,
                                         fontSize = 12.sp
                                     )

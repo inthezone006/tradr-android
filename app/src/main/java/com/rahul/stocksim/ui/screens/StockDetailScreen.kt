@@ -44,6 +44,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.style.TextOverflow
@@ -125,12 +127,20 @@ fun StockDetailScreen(
                         val state = uiState
                         if (state is StockDetailUiState.Success) {
                             Column {
-                                Text(
-                                    text = state.stock.symbol,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = state.stock.symbol,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    MarketStatusDot(
+                                        isOpen = state.marketStatus?.isOpen ?: false,
+                                        isCrypto = state.stock.isCrypto,
+                                        size = 8.dp
+                                    )
+                                }
                                 Text(
                                     text = "$${String.format(Locale.US, "%,.2f", state.stock.price)}",
                                     style = MaterialTheme.typography.bodySmall,
@@ -219,6 +229,11 @@ fun StockDetailScreen(
                                             style = MaterialTheme.typography.displaySmall,
                                             fontWeight = FontWeight.Black,
                                             color = Color.White
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        MarketStatusDot(
+                                            isOpen = state.marketStatus?.isOpen ?: false,
+                                            isCrypto = stock.isCrypto
                                         )
                                     }
                                     Text(
@@ -1770,4 +1785,18 @@ fun formatDate(timestamp: String): String {
     } catch (e: Exception) {
         timestamp
     }
+}
+
+@Composable
+fun MarketStatusDot(isOpen: Boolean, isCrypto: Boolean = false, size: androidx.compose.ui.unit.Dp = 10.dp) {
+    val color = if (isOpen || isCrypto) Color.Green else Color.Red
+    val description = if (isOpen || isCrypto) "Market Open" else "Market Closed"
+    
+    Box(
+        modifier = Modifier
+            .size(size)
+            .clip(CircleShape)
+            .background(color)
+            .semantics { contentDescription = description }
+    )
 }
