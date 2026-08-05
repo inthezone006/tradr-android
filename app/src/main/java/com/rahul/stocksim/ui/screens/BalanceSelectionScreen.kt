@@ -34,8 +34,7 @@ fun BalanceSelectionScreen(
     navController: NavController,
     name: String? = null,
     email: String? = null,
-    password: String? = null,
-    wantsPro: Boolean = false
+    password: String? = null
 ) {
     val authRepository = AuthRepository()
     val coroutineScope = rememberCoroutineScope()
@@ -139,14 +138,8 @@ fun BalanceSelectionScreen(
                                         val result = authRepository.setUserBalance(selectedLevel.amount, selectedLevel.level)
                                         isLoading = false
                                         if (result.isSuccess) {
-                                            if (wantsPro) {
-                                                navController.navigate(Screen.Upgrade.route) {
-                                                    popUpTo(Screen.Login.route) { inclusive = true }
-                                                }
-                                            } else {
-                                                navController.navigate(Screen.Main.route) {
-                                                    popUpTo(Screen.Login.route) { inclusive = true }
-                                                }
+                                            navController.navigate(Screen.Upgrade.createRoute(isSetupMode = true)) {
+                                                popUpTo(Screen.Login.route) { inclusive = true }
                                             }
                                         } else {
                                             snackbarHostState.showSnackbar("Error: ${result.exceptionOrNull()?.localizedMessage}")
@@ -164,14 +157,8 @@ fun BalanceSelectionScreen(
                             val result = authRepository.setUserBalance(selectedLevel.amount, selectedLevel.level)
                             isLoading = false
                             if (result.isSuccess) {
-                                if (wantsPro) {
-                                    navController.navigate(Screen.Upgrade.route) {
-                                        popUpTo(Screen.BalanceSelection.route) { inclusive = true }
-                                    }
-                                } else {
-                                    navController.navigate(Screen.Main.route) {
-                                        popUpTo(Screen.BalanceSelection.route) { inclusive = true }
-                                    }
+                                navController.navigate(Screen.Upgrade.createRoute(isSetupMode = true)) {
+                                    popUpTo(Screen.BalanceSelection.route) { inclusive = true }
                                 }
                             } else {
                                 snackbarHostState.showSnackbar("Error: ${result.exceptionOrNull()?.localizedMessage}")

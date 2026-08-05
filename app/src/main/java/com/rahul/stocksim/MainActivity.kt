@@ -216,23 +216,17 @@ class MainActivity : ComponentActivity() {
                                     type = NavType.StringType
                                     nullable = true
                                     defaultValue = null
-                                },
-                                navArgument("wantsPro") {
-                                    type = NavType.BoolType
-                                    defaultValue = false
                                 }
                             )
                         ) { backStackEntry ->
                             val isChange = backStackEntry.arguments?.getBoolean("isChangePassword") ?: false
                             val name = backStackEntry.arguments?.getString("name")
                             val email = backStackEntry.arguments?.getString("email")
-                            val wantsPro = backStackEntry.arguments?.getBoolean("wantsPro") ?: false
                             PasswordSetupScreen(
                                 navController = navController, 
                                 isChangePassword = isChange,
                                 initialName = name,
-                                initialEmail = email,
-                                wantsPro = wantsPro
+                                initialEmail = email
                             )
                         }
                         composable(
@@ -252,23 +246,17 @@ class MainActivity : ComponentActivity() {
                                     type = NavType.StringType
                                     nullable = true
                                     defaultValue = null
-                                },
-                                navArgument("wantsPro") {
-                                    type = NavType.BoolType
-                                    defaultValue = false
                                 }
                             )
                         ) { backStackEntry ->
                             val name = backStackEntry.arguments?.getString("name")
                             val email = backStackEntry.arguments?.getString("email")
                             val password = backStackEntry.arguments?.getString("password")
-                            val wantsPro = backStackEntry.arguments?.getBoolean("wantsPro") ?: false
                             BalanceSelectionScreen(
                                 navController = navController,
                                 name = name,
                                 email = email,
-                                password = password,
-                                wantsPro = wantsPro
+                                password = password
                             )
                         }
                         composable(Screen.Main.route) {
@@ -282,8 +270,17 @@ class MainActivity : ComponentActivity() {
                         composable(Screen.Settings.route) {
                             SettingsScreen(navController = navController)
                         }
-                        composable(Screen.Upgrade.route) {
-                            UpgradeScreen(navController = navController)
+                        composable(
+                            route = Screen.Upgrade.route,
+                            arguments = listOf(
+                                navArgument("isSetupMode") {
+                                    type = NavType.BoolType
+                                    defaultValue = false
+                                }
+                            )
+                        ) { backStackEntry ->
+                            val isSetup = backStackEntry.arguments?.getBoolean("isSetupMode") ?: false
+                            UpgradeScreen(navController = navController, isSetupMode = isSetup)
                         }
                         composable(Screen.EditProfile.route) {
                             EditProfileScreen(navController = navController)

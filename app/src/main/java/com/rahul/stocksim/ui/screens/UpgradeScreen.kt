@@ -1,6 +1,7 @@
 package com.rahul.stocksim.ui.screens
 
 import android.app.Activity
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -10,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -34,6 +36,7 @@ import com.rahul.stocksim.ui.viewmodels.UpgradeViewModel
 @Composable
 fun UpgradeScreen(
     navController: NavController,
+    isSetupMode: Boolean = false,
     viewModel: UpgradeViewModel = hiltViewModel()
 ) {
     val isPro by viewModel.isPro.collectAsState()
@@ -41,13 +44,37 @@ fun UpgradeScreen(
     val context = LocalContext.current
     val activity = context as? Activity
 
+    LaunchedEffect(isPro) {
+        if (isPro) {
+            Toast.makeText(context, "tradr pro unlocked!", Toast.LENGTH_SHORT).show()
+            if (isSetupMode) {
+                navController.navigate(Screen.Main.route) {
+                    popUpTo(Screen.Upgrade.route) { inclusive = true }
+                }
+            } else {
+                navController.popBackStack()
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("tradr pro") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = { 
+                        if (isSetupMode) {
+                            navController.navigate(Screen.Main.route) {
+                                popUpTo(Screen.Upgrade.route) { inclusive = true }
+                            }
+                        } else {
+                            navController.popBackStack() 
+                        }
+                    }) {
+                        Icon(
+                            imageVector = if (isSetupMode) Icons.Default.Close else Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = if (isSetupMode) "Skip" else "Back"
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -66,53 +93,28 @@ fun UpgradeScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (isPro) {
-                ProSuccessState()
-            } else {
-                UpgradeState(
-                    onUpgradeClick = {
-                        activity?.let { viewModel.purchasePro(it) }
-                    },
-                    purchaseStatus = purchaseStatus
-                )
-            }
+            UpgradeState(
+                onUpgradeClick = {
+                    activity?.let { viewModel.purchasePro(it) }
+                },
+                purchaseStatus = purchaseStatus,
+                isSetupMode = isSetupMode,
+                onContinueClick = {
+                    navController.navigate(Screen.Main.route) {
+                        popUpTo(Screen.Upgrade.route) { inclusive = true }
+                    }
+                }
+            )
         }
-    }
-}
-
-@Composable
-fun ProSuccessState() {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp)
-    ) {
-        Icon(
-            imageVector = Icons.Default.Star,
-            contentDescription = null,
-            tint = Color(0xFFFFD700),
-            modifier = Modifier.size(100.dp)
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = "You are a Pro!",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Enjoy your unlimited access to advanced analysis and power tools.",
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-        )
     }
 }
 
 @Composable
 fun UpgradeState(
     onUpgradeClick: () -> Unit,
-    purchaseStatus: BillingRepository.PurchaseStatus
+    purchaseStatus: BillingRepository.PurchaseStatus,
+    isSetupMode: Boolean,
+    onContinueClick: () -> Unit
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Image(
@@ -128,9 +130,9 @@ fun UpgradeState(
         Spacer(modifier = Modifier.height(32.dp))
 
         FeatureItem("Unlimited Watchlist", "Track as many stocks as you want.")
+        FeatureItem("Unlimited Portfolios", "Simulate different trading strategies.")
         FeatureItem("Technical Indicators", "RSI, MACD, and Bollinger Bands.")
         FeatureItem("Advanced AI", "Deep-dive strategy recommendations.")
-        FeatureItem("Multiple Portfolios", "Simulate different trading strategies.")
         FeatureItem("Pro Badge", "Stand out on the leaderboard.")
 
         Spacer(modifier = Modifier.height(48.dp))
@@ -152,13 +154,20 @@ fun UpgradeState(
             if (purchaseStatus is BillingRepository.PurchaseStatus.Loading) {
                 CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
             } else {
-                Text("UPGRADE NOW", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text("UPGRADE FOR $0.99", fontWeight = FontWeight.Bold, fontSize = 18.sp)
             }
         }
         
-        Spacer(modifier = Modifier.height(16.dp))
+        if (isSetupMode) {
+            Spacer(modifier = Modifier.height(16.dp))
+            TextButton(onClick = onContinueClick) {
+                Text("SKIP FOR NOW", color = Color.Gray, fontWeight = FontWeight.Medium)
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = "Help support Tradr development",
+            text = "Help support tradr development",
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
         )

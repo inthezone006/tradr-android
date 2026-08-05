@@ -19,29 +19,31 @@ sealed class Screen(val route: String) {
         }
     }
     object Register : Screen("register_screen")
-    object PasswordSetup : Screen("password_setup_screen/{isChangePassword}?name={name}&email={email}&wantsPro={wantsPro}") {
-        fun createRoute(isChangePassword: Boolean, name: String? = null, email: String? = null, wantsPro: Boolean = false): String {
+    object PasswordSetup : Screen("password_setup_screen/{isChangePassword}?name={name}&email={email}") {
+        fun createRoute(isChangePassword: Boolean, name: String? = null, email: String? = null): String {
             val base = "password_setup_screen/$isChangePassword"
             val queryParams = mutableListOf<String>()
             if (name != null) queryParams.add("name=$name")
             if (email != null) queryParams.add("email=$email")
-            queryParams.add("wantsPro=$wantsPro")
             return if (queryParams.isEmpty()) base else "$base?${queryParams.joinToString("&")}"
         }
     }
-    object BalanceSelection : Screen("balance_selection_screen?name={name}&email={email}&password={password}&wantsPro={wantsPro}") {
-        fun createRoute(name: String? = null, email: String? = null, password: String? = null, wantsPro: Boolean = false): String {
+    object BalanceSelection : Screen("balance_selection_screen?name={name}&email={email}&password={password}") {
+        fun createRoute(name: String? = null, email: String? = null, password: String? = null): String {
             val base = "balance_selection_screen"
             val queryParams = mutableListOf<String>()
             if (name != null) queryParams.add("name=$name")
             if (email != null) queryParams.add("email=$email")
             if (password != null) queryParams.add("password=$password")
-            queryParams.add("wantsPro=$wantsPro")
             return if (queryParams.isEmpty()) base else "$base?${queryParams.joinToString("&")}"
         }
     }
     object Settings : Screen("settings_screen")
-    object Upgrade : Screen("upgrade_screen")
+    object Upgrade : Screen("upgrade_screen?isSetupMode={isSetupMode}") {
+        fun createRoute(isSetupMode: Boolean = false): String {
+            return "upgrade_screen?isSetupMode=$isSetupMode"
+        }
+    }
     object EditProfile : Screen("edit_profile_screen")
     object Main : Screen("main_screen")
     object Details : Screen("details/{symbol}") {

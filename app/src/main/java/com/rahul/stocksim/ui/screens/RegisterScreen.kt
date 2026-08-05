@@ -60,7 +60,6 @@ fun RegisterScreen(navController: NavController) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
-    var wantsPro by remember { mutableStateOf(false) }
 
     val isFormValid = name.isNotEmpty() && email.contains("@") && email.contains(".")
 
@@ -150,72 +149,6 @@ fun RegisterScreen(navController: NavController) {
                                 keyboardType = KeyboardType.Email
                             )
                         )
-
-                        Spacer(modifier = Modifier.height(32.dp))
-
-                        // Tradr Pro Option
-                        Card(
-                            onClick = { wantsPro = !wantsPro },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = if (wantsPro) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) 
-                                               else MaterialTheme.colorScheme.surface
-                            ),
-                            border = BorderStroke(
-                                1.dp, 
-                                if (wantsPro) MaterialTheme.colorScheme.primary 
-                                else Color.Gray.copy(alpha = 0.3f)
-                            ),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .background(
-                                            if (wantsPro) MaterialTheme.colorScheme.primary 
-                                            else Color.DarkGray, 
-                                            CircleShape
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Star,
-                                        contentDescription = null,
-                                        tint = if (wantsPro) Color.White else Color.Gray,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                                
-                                Spacer(modifier = Modifier.width(16.dp))
-                                
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = "Upgrade to tradr pro",
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White,
-                                        fontSize = 16.sp
-                                    )
-                                    Text(
-                                        text = "Unlock AI analysis, unlimited portfolios, and deeper insights for $0.99",
-                                        color = Color.Gray,
-                                        fontSize = 12.sp
-                                    )
-                                }
-                                
-                                Checkbox(
-                                    checked = wantsPro,
-                                    onCheckedChange = { wantsPro = it },
-                                    colors = CheckboxDefaults.colors(
-                                        checkedColor = MaterialTheme.colorScheme.primary,
-                                        uncheckedColor = Color.Gray
-                                    )
-                                )
-                            }
-                        }
                     }
                 }
 
@@ -238,7 +171,7 @@ fun RegisterScreen(navController: NavController) {
                                     if (exists) {
                                         snackbarHostState.showSnackbar("This email is already in use.")
                                     } else {
-                                        navController.navigate(Screen.PasswordSetup.createRoute(false, name, email, wantsPro))
+                                        navController.navigate(Screen.PasswordSetup.createRoute(false, name, email))
                                     }
                                 }
                             },
@@ -267,12 +200,12 @@ fun RegisterScreen(navController: NavController) {
                                         signInResult.onSuccess { isNewUser ->
                                             val user = authRepository.currentUser
                                             if (isNewUser) {
-                                                navController.navigate(Screen.PasswordSetup.createRoute(false, user?.displayName, user?.email, wantsPro))
+                                                navController.navigate(Screen.PasswordSetup.createRoute(false, user?.displayName, user?.email))
                                             } else {
                                                 if (authRepository.isProfileCreated()) {
                                                     navController.navigate(Screen.Main.route) { popUpTo(Screen.Register.route) { inclusive = true } }
                                                 } else {
-                                                    navController.navigate(Screen.BalanceSelection.createRoute(user?.displayName, user?.email, null, wantsPro))
+                                                    navController.navigate(Screen.BalanceSelection.createRoute(user?.displayName, user?.email, null))
                                                 }
                                             }
                                         }.onFailure { e ->
