@@ -11,7 +11,5 @@ class PreferenceRepository @Inject constructor(
 ) {
     private val prefs = context.getSharedPreferences("tradr_prefs", Context.MODE_PRIVATE)
 
-    var rebrandNoticeShown: Boolean
-        get() = prefs.getBoolean("rebrand_notice_shown", false)
-        set(value) = prefs.edit().putBoolean("rebrand_notice_shown", value).apply()
+    // Add general app preferences here
 }

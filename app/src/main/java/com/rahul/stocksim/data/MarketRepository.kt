@@ -257,11 +257,11 @@ class MarketRepository @Inject constructor(
     private val twelveDataApi: TwelveDataApi,
     private val stockDao: StockDao,
     private val billingRepository: BillingRepository,
+    private val authRepository: AuthRepository,
     @ApplicationContext private val context: Context
 ) {
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
-    private val analytics = Firebase.analytics
     private val crashlytics = Firebase.crashlytics
     private val notificationHelper = NotificationHelper(context)
     private val gson = Gson()
@@ -463,7 +463,10 @@ class MarketRepository @Inject constructor(
                         if (profileRes.name != null) companyNameMap[symbol] = profileRes.name
                         if (profileRes.finnhubIndustry != null) industryCache[symbol] = profileRes.finnhubIndustry!!
                         if (profileRes.logo != null) logoCache[symbol] = profileRes.logo!!
-                    } catch (e: Exception) {}
+                    } catch (e: Exception) {
+                        // Silent fail for profile, but log to crashlytics
+                        crashlytics.log("Profile fetch failed for $symbol during quote refresh")
+                    }
                 }
 
                 val isCrypto = symbol.startsWith("BINANCE:") || cryptoSymbols.contains(symbol)
@@ -880,7 +883,7 @@ class MarketRepository @Inject constructor(
 
         return try {
             firestore.collection("users").document(userId).collection("watchlist").document(symbol).set(mapOf("symbol" to symbol)).await()
-            analytics.logEvent(FirebaseAnalytics.Event.ADD_TO_WISHLIST, Bundle().apply { putString(FirebaseAnalytics.Param.ITEM_ID, symbol) })
+            authRepository.logEventWithUser(FirebaseAnalytics.Event.ADD_TO_WISHLIST, Bundle().apply { putString(FirebaseAnalytics.Param.ITEM_ID, symbol) })
             Result.success(Unit)
         } catch (e: Exception) {
             recordError(e)
@@ -1150,7 +1153,7 @@ class MarketRepository @Inject constructor(
                 }
             }
             
-            analytics.logEvent(FirebaseAnalytics.Event.PURCHASE, Bundle().apply { putString(FirebaseAnalytics.Param.CURRENCY, "USD"); putDouble(FirebaseAnalytics.Param.VALUE, totalCost); putString(FirebaseAnalytics.Param.TRANSACTION_ID, symbol) })
+            authRepository.logEventWithUser(FirebaseAnalytics.Event.PURCHASE, Bundle().apply { putString(FirebaseAnalytics.Param.CURRENCY, "USD"); putDouble(FirebaseAnalytics.Param.VALUE, totalCost); putString(FirebaseAnalytics.Param.TRANSACTION_ID, symbol) })
             globalPortfolioCache = null
             Result.success(newBalance)
         } catch (e: Exception) {

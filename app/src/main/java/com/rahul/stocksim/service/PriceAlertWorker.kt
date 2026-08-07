@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.*
 import com.google.firebase.Timestamp
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.rahul.stocksim.data.MarketRepository
 import com.rahul.stocksim.data.local.StockDao
 import com.rahul.stocksim.model.ContractStatus
@@ -129,6 +130,7 @@ class PriceAlertWorker @AssistedInject constructor(
             Result.success()
         } catch (e: Exception) {
             Log.e("PriceAlertWorker", "Error in background work", e)
+            FirebaseCrashlytics.getInstance().recordException(e)
             Result.retry()
         }
     }

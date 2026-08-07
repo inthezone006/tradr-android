@@ -4,7 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.util.Log
 import com.android.billingclient.api.*
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.crashlytics.crashlytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.rahul.stocksim.BuildConfig
@@ -24,6 +26,12 @@ class BillingRepository @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
+    private val crashlytics = Firebase.crashlytics
+
+    private fun recordError(e: Exception) {
+        if (e is CancellationException) return
+        crashlytics.recordException(e)
+    }
 
     private val billingClient = BillingClient.newBuilder(context)
         .setListener(this)
@@ -187,6 +195,7 @@ class BillingRepository @Inject constructor(
                 Log.d("BillingRepository", "Pro status synced with Firebase")
             } catch (e: Exception) {
                 Log.e("BillingRepository", "Error syncing Pro status", e)
+                recordError(e)
             }
         }
     }
@@ -203,6 +212,7 @@ class BillingRepository @Inject constructor(
             _isPro.value = pro
             pro
         } catch (e: Exception) {
+            recordError(e)
             false
         }
     }

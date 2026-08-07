@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.*
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.rahul.stocksim.data.MarketRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -38,6 +39,7 @@ class DailyHistoryWorker @AssistedInject constructor(
             Result.success()
         } catch (e: Exception) {
             Log.e("DailyHistoryWorker", "Error saving daily history", e)
+            FirebaseCrashlytics.getInstance().recordException(e)
             Result.retry()
         }
     }

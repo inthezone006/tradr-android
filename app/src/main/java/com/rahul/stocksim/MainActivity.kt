@@ -33,6 +33,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import com.google.firebase.auth.auth
 import com.google.firebase.messaging.messaging
+import com.google.firebase.firestore.firestore
 import com.rahul.stocksim.data.AuthRepository
 import com.rahul.stocksim.service.PriceAlertWorker
 import com.rahul.stocksim.service.DailyHistoryWorker
@@ -46,9 +47,6 @@ class MainActivity : ComponentActivity() {
     
     @Inject
     lateinit var authRepository: AuthRepository
-
-    @Inject
-    lateinit var preferenceRepository: com.rahul.stocksim.data.PreferenceRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -72,13 +70,6 @@ class MainActivity : ComponentActivity() {
             val auth = Firebase.auth
             val analytics = Firebase.analytics
             val context = LocalContext.current
-
-            var showRebrandNotice by remember { 
-                //mutableStateOf(true)
-                mutableStateOf(!preferenceRepository.rebrandNoticeShown)
-            }
-
-
 
             fun fetchAndSaveToken() {
                 Firebase.messaging.token.addOnCompleteListener { task ->
@@ -128,8 +119,10 @@ class MainActivity : ComponentActivity() {
                         auth.signOut()
                         startDest.value = Screen.Login.createRoute("Account was not fully set up. Please sign in again.")
                     } else {
-                        // Ensure isPro tag exists
-                        authRepository.isProUser()
+                        // Sync Analytics
+                        val isPro = authRepository.isProUser()
+                        authRepository.setUserProperties(isPro, 4) // Default level, will be updated on next action
+                        
                         startDest.value = Screen.Main.route
                     }
                 } else {
@@ -151,12 +144,6 @@ class MainActivity : ComponentActivity() {
             }
 
             TradrTheme {
-                if (showRebrandNotice) {
-                    RebrandNoticeDialog(onDismiss = {
-                        preferenceRepository.rebrandNoticeShown = true
-                        showRebrandNotice = false
-                    })
-                }
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

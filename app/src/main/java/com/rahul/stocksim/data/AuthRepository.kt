@@ -76,6 +76,7 @@ class AuthRepository @Inject constructor() {
         
         user?.let {
             crashlytics.setUserId(it.uid)
+            analytics.setUserId(it.uid)
         }
 
         bundle.apply {
@@ -84,12 +85,20 @@ class AuthRepository @Inject constructor() {
             putString("user_email", user?.email ?: "anonymous")
             putString("device_model", android.os.Build.MODEL)
             putString("android_version", android.os.Build.VERSION.RELEASE)
+            putBoolean("is_pro", BuildConfig.DEBUG || (user != null && user.email == "rahul.menon85280@gmail.com")) // Example check, ideally synced from Firestore
         }
         
         analytics.logEvent(eventName, bundle)
         
         val params = bundle.keySet().joinToString(", ") { "$it=${bundle.get(it)}" }
         Log.d("APP_EVENT", "Event: $eventName | Params: $params")
+    }
+
+    suspend fun setUserProperties(isPro: Boolean, level: Int) {
+        analytics.setUserProperty("is_pro_user", isPro.toString())
+        analytics.setUserProperty("user_difficulty_level", level.toString())
+        crashlytics.setCustomKey("is_pro", isPro)
+        crashlytics.setCustomKey("user_level", level)
     }
 
     fun login(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
@@ -326,6 +335,8 @@ class AuthRepository @Inject constructor() {
             }
             historyBatch.commit().await()
 
+            setUserProperties(BuildConfig.DEBUG, level)
+            
             logEventWithUser("select_difficulty_level", Bundle().apply {
                 putInt("level", level)
                 putDouble("initial_balance", balance)
@@ -365,15 +376,10 @@ class AuthRepository @Inject constructor() {
         val user = auth.currentUser ?: return false
         return try {
             val snapshot = firestore.collection("users").document(user.uid).get().await()
-            val hasPro = snapshot.getBoolean("isPro")
-            if (hasPro == null) {
-                // Initialize if missing
-                firestore.collection("users").document(user.uid)
-                    .set(mapOf("isPro" to false), SetOptions.merge()).await()
-                false
-            } else {
-                hasPro
-            }
+            val hasPro = snapshot.getBoolean("isPro") ?: false
+            val level = (snapshot.get("level") as? Number)?.toInt() ?: 4
+            setUserProperties(hasPro, level)
+            hasPro
         } catch (e: Exception) {
             recordError(e)
             false
